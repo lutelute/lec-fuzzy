@@ -136,25 +136,25 @@
       <span class="sec-sub">易しい順に進み、最後に応用へ。デモは何度でも触って構いません</span>
     </div>
     <div class="flow">
-      <a class="step" href="fuzzy_temperature_controller.html">
+      <a class="step" href="demos/fuzzy_temperature_controller.html">
         <span class="step-num">STEP 1</span>
         <span class="step-title">温度制御デモ</span>
         <span class="step-desc">入力 1 つ（温度）の最小構成。Cold / Warm / Hot のメンバーシップ関数から、ファン速度が決まるまでの一連の流れを 1 画面で追えます。「ファジィ化・推論・デファジィ化」を最初に体感する章。</span>
         <span class="step-go">1 入力 Mamdani を開く →</span>
       </a>
-      <a class="step" href="fuzzy_logic_controller.html">
+      <a class="step" href="demos/fuzzy_logic_controller.html">
         <span class="step-num">STEP 2</span>
         <span class="step-title">PD 型制御デモ</span>
         <span class="step-desc">入力 2 つ（偏差 e と偏差微分 ė）。5×5 のルール表と制御曲面 u(e, ė) を操作し、ファジィ制御器が <em>非線形な PD 制御則</em> を実現していることを目で確かめます。教科書の PID との接続点。</span>
         <span class="step-go">2 入力・制御曲面を開く →</span>
       </a>
-      <a class="step" href="lecture-notes.html">
+      <a class="step" href="content/lecture-notes.html">
         <span class="step-num">STEP 3</span>
         <span class="step-title">講義ノート</span>
         <span class="step-desc">デモで見た内容を数式で整理します。ファジィ集合・三角形 MF・min–max 合成・重心法を定義し、PD 制御との関係を導出。各節に教科書併用のサイドノートと演習問題を用意。</span>
         <span class="step-go">理論と演習へ →</span>
       </a>
-      <a class="step" href="fuzzy-applications.html">
+      <a class="step" href="content/fuzzy-applications.html">
         <span class="step-num">発展</span>
         <span class="step-title">応用ショーケース</span>
         <span class="step-desc">世の中の実用例（家電・鉄道・産業）と最新動向（Takagi–Sugeno・Type-2・ニューロファジィ・XAI・再エネ）を一望。触って試せるミニデモ 3 種（ファジィ洗濯機・TS 局所線形・Type-1/2）つき。</span>
@@ -181,27 +181,27 @@
           <tr>
             <td class="classic">偏差 <math><mrow><mi>e</mi><mo>=</mo><mi>r</mi><mo>−</mo><mi>y</mi></mrow></math></td>
             <td class="fuzzy">ファジィ化する入力変数（温度偏差・誤差そのもの）</td>
-            <td class="where"><a href="fuzzy_temperature_controller.html">温度デモ</a> / <a href="fuzzy_logic_controller.html">PD デモ</a></td>
+            <td class="where"><a href="demos/fuzzy_temperature_controller.html">温度デモ</a> / <a href="demos/fuzzy_logic_controller.html">PD デモ</a></td>
           </tr>
           <tr>
             <td class="classic">PD 制御則 <math><mrow><mi>u</mi><mo>=</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math></td>
             <td class="fuzzy">入力に <math><mrow><mi>e</mi></mrow></math> と <math><mrow><mover><mi>e</mi><mo>˙</mo></mover></mrow></math> をとる PD 型ファジィ制御器</td>
-            <td class="where"><a href="fuzzy_logic_controller.html">PD デモ</a> / §6</td>
+            <td class="where"><a href="demos/fuzzy_logic_controller.html">PD デモ</a> / §6</td>
           </tr>
           <tr>
             <td class="classic">ゲイン <math><mrow><msub><mi>K</mi><mi>p</mi></msub><mo>,</mo><msub><mi>K</mi><mi>d</mi></msub></mrow></math> の調整</td>
             <td class="fuzzy">ルール表の中身とメンバーシップ関数の形（暗黙のゲイン設計）</td>
-            <td class="where"><a href="fuzzy_logic_controller.html">PD デモ</a></td>
+            <td class="where"><a href="demos/fuzzy_logic_controller.html">PD デモ</a></td>
           </tr>
           <tr>
             <td class="classic">線形フィードバック（定ゲイン）</td>
             <td class="fuzzy">制御曲面 <math><mrow><mi>u</mi><mo>(</mo><mi>e</mi><mo>,</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>)</mo></mrow></math> — 飽和や鈍感帯を含む<em>非線形</em>写像</td>
-            <td class="where"><a href="fuzzy_logic_controller.html">PD デモ</a> / §6</td>
+            <td class="where"><a href="demos/fuzzy_logic_controller.html">PD デモ</a> / §6</td>
           </tr>
           <tr>
             <td class="classic">静特性・入出力特性</td>
             <td class="fuzzy">伝達特性 <math><mrow><mi>u</mi><mo>(</mo><mi>T</mi><mo>)</mo></mrow></math>（温度→ファン速度のカーブ）</td>
-            <td class="where"><a href="fuzzy_temperature_controller.html">温度デモ</a></td>
+            <td class="where"><a href="demos/fuzzy_temperature_controller.html">温度デモ</a></td>
           </tr>
           <tr>
             <td class="classic">オンオフ制御 / PID 制御</td>
@@ -255,49 +255,49 @@
       <span class="sec-sub">すべて同じフォルダに置けば相互リンクで行き来できます</span>
     </div>
     <div class="files">
-      <a class="file" href="fuzzy_temperature_controller.html">
+      <a class="file" href="demos/fuzzy_temperature_controller.html">
         <span class="file-ico">1D</span>
         <span>
           <span class="file-name">fuzzy_temperature_controller.html</span>
           <span class="file-desc">Step 1：1 入力 Mamdani 温度制御デモ</span>
         </span>
       </a>
-      <a class="file" href="fuzzy_logic_controller.html">
+      <a class="file" href="demos/fuzzy_logic_controller.html">
         <span class="file-ico">2D</span>
         <span>
           <span class="file-name">fuzzy_logic_controller.html</span>
           <span class="file-desc">Step 2：PD 型・5×5 ルール・制御曲面デモ</span>
         </span>
       </a>
-      <a class="file" href="lecture-notes.html">
+      <a class="file" href="content/lecture-notes.html">
         <span class="file-ico">§</span>
         <span>
           <span class="file-name">lecture-notes.html</span>
           <span class="file-desc">Step 3：講義ノート（理論・数式・教科書サイドノート・演習）</span>
         </span>
       </a>
-      <a class="file" href="fuzzy-applications.html">
+      <a class="file" href="content/fuzzy-applications.html">
         <span class="file-ico">★</span>
         <span>
           <span class="file-name">fuzzy-applications.html</span>
           <span class="file-desc">発展：応用ショーケース（実用例・最新動向・ミニデモ3種）</span>
         </span>
       </a>
-      <a class="file" href="how-to-use.html">
+      <a class="file" href="guides/how-to-use.html">
         <span class="file-ico">?</span>
         <span>
           <span class="file-name">how-to-use.html</span>
           <span class="file-desc">デモ操作ガイド（学生向け・観察ポイント）</span>
         </span>
       </a>
-      <a class="file" href="teacher-guide.html">
+      <a class="file" href="guides/teacher-guide.html">
         <span class="file-ico">T</span>
         <span>
           <span class="file-name">teacher-guide.html</span>
           <span class="file-desc">教員用ガイド＋模範解答（授業展開・時間配分）</span>
         </span>
       </a>
-      <a class="file" href="overview.html">
+      <a class="file" href="guides/overview.html">
         <span class="file-ico">1p</span>
         <span>
           <span class="file-name">overview.html</span>

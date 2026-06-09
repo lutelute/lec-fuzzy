@@ -82,11 +82,11 @@
 <div class="app">
 
   <nav class="lec-nav">
-    <a class="home" href="index.html">← 教材トップ</a>
+    <a class="home" href="../index.html">← 教材トップ</a>
     <span class="sep">·</span>
-    <a href="lecture-notes.html">講義ノート</a>
-    <a href="fuzzy_temperature_controller.html">温度デモ</a>
-    <a href="fuzzy_logic_controller.html">PDデモ</a>
+    <a href="../content/lecture-notes.html">講義ノート</a>
+    <a href="../demos/fuzzy_temperature_controller.html">温度デモ</a>
+    <a href="../demos/fuzzy_logic_controller.html">PDデモ</a>
   </nav>
 
   <div class="doc">
@@ -103,7 +103,7 @@
 
     <!-- ===== 温度デモ ===== -->
     <h2 class="sec"><span class="ic">1.</span>温度制御デモ（1 入力）</h2>
-    <a class="open-btn" href="fuzzy_temperature_controller.html">温度デモを開く ↗</a>
+    <a class="open-btn" href="../demos/fuzzy_temperature_controller.html">温度デモを開く ↗</a>
     <p>入力は温度ひとつ。「Cold / Warm / Hot」から「ファン速度」が決まるまでを 4 つのパネルで見ます。</p>
 
     <div class="panel-doc"><div class="pn">①</div><div class="pb"><div class="pt">上部：温度スライダー と ファン速度</div><div class="pd"><b>温度（°C）</b>を左右に動かすと、青いカード<b>ファン速度</b>に最終出力（%）が出ます。これがファジィ制御器の「答え」。</div></div></div>
@@ -129,7 +129,7 @@
 
     <!-- ===== PDデモ ===== -->
     <h2 class="sec"><span class="ic">2.</span>PD 型制御デモ（2 入力・制御曲面）</h2>
-    <a class="open-btn" href="fuzzy_logic_controller.html">PD デモを開く ↗</a>
+    <a class="open-btn" href="../demos/fuzzy_logic_controller.html">PD デモを開く ↗</a>
     <p>入力は<b>偏差 e</b> と<b>偏差の変化 ė</b> の 2 つ。出力は制御入力 u。これは古典制御の PD 制御に対応します。</p>
 
     <div class="panel-doc"><div class="pn">①</div><div class="pb"><div class="pt">上部：e / ė スライダー、確定出力 u、プリセット</div><div class="pd"><math><mi>e</mi></math> と <math><mover><mi>e</mi><mo>˙</mo></mover></math> を設定すると青カードに <b>u</b>。<b>標準PD / アグレッシブ / ソフト / クリア</b>のプリセットでルール表を一括変更できます。</div></div></div>
@@ -159,10 +159,10 @@
     </div>
 
     <h2 class="sec"><span class="ic">3.</span>次に</h2>
-    <p>操作に慣れたら<a href="lecture-notes.html">講義ノート</a>で理論を、<a href="fuzzy-applications.html">応用ショーケース</a>で実用例と最新動向を見てみましょう。</p>
+    <p>操作に慣れたら<a href="../content/lecture-notes.html">講義ノート</a>で理論を、<a href="../content/fuzzy-applications.html">応用ショーケース</a>で実用例と最新動向を見てみましょう。</p>
 
     <div class="footer">
-      デモ操作ガイド · <a href="index.html">教材トップへ</a><br>
+      デモ操作ガイド · <a href="../index.html">教材トップへ</a><br>
       温度デモ・PD デモはともに Mamdani 推論（max–min 合成・重心デファジィ化）
     </div>
   </div>

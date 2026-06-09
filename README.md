@@ -1,5 +1,8 @@
 # ファジィ制御 インタラクティブ教材（制御理論教科書 併用版）
 
+> ### 🌐 公開教材（ブラウザですぐ動く）→ **<https://lutelute.github.io/lec-fuzzy/>**
+> 学生にはこのトップ URL を渡すだけで OK です。
+
 制御工学の教科書で **PID 制御** までを学んだ学習者を対象に、ファジィ制御を
 **ファジィ化 → ルール推論（Mamdani）→ デファジィ化** の流れで体験し、さらに
 **実用例・最新動向** までを一望できる教材スイートです。
@@ -7,43 +10,63 @@
 
 ---
 
-## 教材構成（全 9 ファイル）
+## 教材を開く（クリックで動きます）
 
 ### 中核（学習順）
 
-| # | ファイル | 役割 |
+| # | 教材 | 役割 |
 |---|---|---|
-| — | `index.html` | **教材トップ**。学習フロー・制御理論教科書との対応表・各ファイルへの導線 |
-| 1 | `fuzzy_temperature_controller.html` | **Step 1**：1 入力 Mamdani 温度制御デモ（Cold/Warm/Hot → Slow/Medium/Fast） |
-| 2 | `fuzzy_logic_controller.html` | **Step 2**：PD 型・5×5 ルール・制御曲面 u(e, ė) デモ |
-| 3 | `lecture-notes.html` | **Step 3**：講義ノート（理論・数式導出・教科書サイドノート・演習7問） |
-| 4 | `fuzzy-applications.html` | **発展**：応用ショーケース（実用例・最新動向＋ミニデモ3種） |
+| 🏠 | **[教材トップ（ポータル）](https://lutelute.github.io/lec-fuzzy/)** | 学習フロー・教科書対応表・全導線 |
+| 1 | **[Step 1：温度制御デモ ▶](https://lutelute.github.io/lec-fuzzy/demos/fuzzy_temperature_controller.html)** | 1 入力 Mamdani（Cold/Warm/Hot → Slow/Medium/Fast） |
+| 2 | **[Step 2：PD 型制御デモ ▶](https://lutelute.github.io/lec-fuzzy/demos/fuzzy_logic_controller.html)** | 5×5 ルール・制御曲面 u(e, ė) |
+| 3 | **[Step 3：講義ノート ▶](https://lutelute.github.io/lec-fuzzy/content/lecture-notes.html)** | 理論・数式・教科書サイドノート・演習7問 |
+| 4 | **[発展：応用ショーケース ▶](https://lutelute.github.io/lec-fuzzy/content/fuzzy-applications.html)** | 実用例・最新動向＋ミニデモ3種 |
 
 ### 補助資料
 
-| ファイル | 役割 | 対象 |
+| 教材 | 役割 | 対象 |
 |---|---|---|
-| `how-to-use.html` | デモ操作ガイド（各UIの見方・観察ポイント） | 学生 |
-| `teacher-guide.html` | 教員用ガイド＋**演習の模範解答**（授業展開・時間配分・ルーブリック） | 教員 |
-| `overview.html` | 配布用サマリー1枚（教材全体マップ・**印刷対応**） | 配布用 |
-| `README.md` | 本ファイル（構成・使い方） | 全員 |
+| **[デモ操作ガイド ▶](https://lutelute.github.io/lec-fuzzy/guides/how-to-use.html)** | 各 UI の見方・観察ポイント | 学生 |
+| **[教員用ガイド＋模範解答 ▶](https://lutelute.github.io/lec-fuzzy/guides/teacher-guide.html)** | 授業展開・時間配分・解答・ルーブリック | 教員 |
+| **[配布用サマリー1枚 ▶](https://lutelute.github.io/lec-fuzzy/guides/overview.html)** | 教材全体マップ（印刷対応） | 配布用 |
 
-> すべて**同じフォルダに置けば**相互リンク（相対パス）で行き来できます。フォルダごと移動・コピーしても動作します。
+> ⚠ `teacher-guide.html` は演習の**模範解答**を含みます。公開しているため URL 直打ちで閲覧可能です。学生にはトップ URL のみ案内してください。
+
+---
+
+## フォルダ構成
+
+```
+lec-fuzzy/
+├── index.html                … 教材トップ（ポータル）
+├── README.md
+├── demos/                    … 触って動かす体験デモ
+│   ├── fuzzy_temperature_controller.html   … Step 1（1入力）
+│   └── fuzzy_logic_controller.html         … Step 2（2入力・制御曲面）
+├── content/                  … 学習コンテンツ
+│   ├── lecture-notes.html                  … Step 3（理論・演習）
+│   └── fuzzy-applications.html             … 発展（応用ショーケース）
+└── guides/                   … ガイド・補助資料
+    ├── how-to-use.html                     … デモ操作ガイド
+    ├── teacher-guide.html                  … 教員ガイド＋解答
+    └── overview.html                       … 配布サマリー（印刷用）
+```
+
+> 相互リンクはすべて相対パス。フォルダごと移動・コピーしても動作します。ローカルでは `index.html` をダブルクリックで開けます（インストール・ネット接続不要）。
 
 ---
 
 ## 使い方
 
 ### 学生
-1. `index.html` をブラウザで開く（ダブルクリックで OK）。
-2. **Step 1 → Step 2 → 講義ノート → 応用ショーケース** の順に進む。操作に迷ったら `how-to-use.html`。
+1. [教材トップ](https://lutelute.github.io/lec-fuzzy/) を開く。
+2. **Step 1 → Step 2 → 講義ノート → 応用ショーケース** の順に進む。操作に迷ったら [デモ操作ガイド](https://lutelute.github.io/lec-fuzzy/guides/how-to-use.html)。
 3. 講義ノート §7 の演習を「手計算 → デモで答え合わせ」の順で解く。
 
 ### 教員
-- `teacher-guide.html` に授業展開（1〜2 コマ）・時間配分・**演習7問の完全解答（デモ実測値つき）**・評価ルーブリックを収録。
-- 演習解答を見せたくない場合は `teacher-guide.html` を学生に共有しないでください。
+- [教員用ガイド](https://lutelute.github.io/lec-fuzzy/guides/teacher-guide.html) に授業展開（1〜2 コマ）・時間配分・**演習7問の完全解答（デモ実測値つき）**・評価ルーブリックを収録。
 - ルール表・MF はデモ上でクリック編集でき、「ゲインを上げると応答がどう変わるか」をリアルタイムに提示できます。
-- `overview.html` を `⌘/Ctrl + P` で PDF 化すれば配布プリントになります。
+- [配布用サマリー](https://lutelute.github.io/lec-fuzzy/guides/overview.html) を `⌘/Ctrl + P` で PDF 化すれば配布プリントになります。
 
 ---
 
@@ -56,14 +79,12 @@
 - 端での**飽和**は、アクチュエータを保護する非線形性として読める。
 - ルール表・MF 形状の調整 ＝ 古典制御の**ゲインチューニング**に対応。
 
-→ 対応表は `index.html`、導出は `lecture-notes.html` §6、定量的な解答は `teacher-guide.html` を参照。
+→ 対応表は[教材トップ](https://lutelute.github.io/lec-fuzzy/)、導出は[講義ノート §6](https://lutelute.github.io/lec-fuzzy/content/lecture-notes.html#s6)、定量的な解答は[教員ガイド](https://lutelute.github.io/lec-fuzzy/guides/teacher-guide.html)を参照。
 特定の教科書に依存しないよう、古典制御（PID・周波数応答）の標準的内容に対応づけています。
 
 ---
 
-## 応用・最新動向（応用ショーケース）
-
-`fuzzy-applications.html` では、ファジィの実用と研究の現在地を扱います。
+## 応用・最新動向（[応用ショーケース](https://lutelute.github.io/lec-fuzzy/content/fuzzy-applications.html)）
 
 - **歴史**：Zadeh(1965) → Mamdani(1974) → セメント窯(1978) → 高木・菅野(1985) → 仙台地下鉄(1987) → 日本のファジィ家電ブーム(1990) → ANFIS(1993) → Type-2(2002) → 現在
 - **実用例**：洗濯機・エアコン・掃除機（家電）、仙台地下鉄 ATO（鉄道）、自動変速機（自動車）、セメント窯（産業）、エレベータ群管理、信号制御 ほか（年代・主体・出典つき）
@@ -88,10 +109,10 @@
 - 数式は **MathML**（モダンブラウザがネイティブ表示）。グラフ・図は **SVG** を JavaScript で描画。
 - ライト／ダークモードに自動対応（OS 設定に追従）。
 - 推論方式：Mamdani（三角形・台形 MF／前件部 min／max–of–min 合成／重心デファジィ化、数値積分）。応用デモには Takagi–Sugeno 型・Interval Type-2 の簡略実装を含む。
-- 演習の解答値は、各デモの推論ロジックを再現して算出（`teacher-guide.html`）。
+- 演習の解答値は、各デモの推論ロジックを再現して算出（教員ガイド）。
 
 ### 既知の修正
-- `fuzzy_logic_controller.html` の SVG 描画が未定義 CSS 変数（`--text-primary` 等）を参照しており、特にダークモードで軸・曲線が表示されない不具合があったため、`:root` にエイリアスを追加して修正済み。
+- `demos/fuzzy_logic_controller.html` の SVG 描画が未定義 CSS 変数（`--text-primary` 等）を参照しており、特にダークモードで軸・曲線が表示されない不具合があったため、`:root` にエイリアスを追加して修正済み。
 
 ---
 
