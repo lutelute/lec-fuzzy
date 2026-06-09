@@ -1,5 +1,11 @@
 # ファジィ制御 インタラクティブ教材（制御理論教科書 併用版）
 
+[![Live Demo](https://img.shields.io/badge/%E2%96%B6_Live_Demo-GitHub_Pages-2563eb)](https://lutelute.github.io/lec-fuzzy/)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-4caf50)](LICENSE)
+[![Dependencies](https://img.shields.io/badge/dependencies-none-success)](#技術メモ)
+[![Math: MathML](https://img.shields.io/badge/math-MathML-ff9800)](#技術メモ)
+[![Single-file HTML](https://img.shields.io/badge/single--file-HTML%2FCSS%2FJS-607d8b)](#フォルダ構成)
+
 > ### 🌐 公開教材（ブラウザですぐ動く）→ **<https://lutelute.github.io/lec-fuzzy/>**
 > 学生にはこのトップ URL を渡すだけで OK です。
 
@@ -7,6 +13,29 @@
 **ファジィ化 → ルール推論（Mamdani）→ デファジィ化** の流れで体験し、さらに
 **実用例・最新動向** までを一望できる教材スイートです。
 すべてブラウザだけで動き、外部ライブラリ・ネット接続は不要です。
+
+---
+
+## ✨ 特徴
+
+- 🎮 **触って学ぶデモ** — Mamdani / Takagi–Sugeno / Type-2 をインタラクティブに体験（スライダー・クリックでルール編集）
+- 📐 **数式は MathML・図は SVG** — 単一 HTML で完結、ライブラリ・CDN 不要
+- 🌗 **ライト/ダークモード自動対応** — OS 設定に追従
+- 📚 **古典制御 (PID) と接続** — 「ファジィ制御＝飽和付き非線形 PD」を講義ノート＋演習7問（模範解答つき）で
+- 🏭 **実用例・最新動向** — 家電・鉄道・産業から再エネ・XAI まで、出典つき
+- 🍎 **配布が簡単** — ダブルクリックで開くだけ／フォルダごとコピー可
+
+---
+
+## 📸 スクリーンショット
+
+| 教材トップ（ポータル） | PD 型制御デモ（制御曲面） |
+|:---:|:---:|
+| [![教材トップ](images/screenshot-index.png)](https://lutelute.github.io/lec-fuzzy/) | [![PD型制御デモ](images/screenshot-pd.png)](https://lutelute.github.io/lec-fuzzy/demos/fuzzy_logic_controller.html) |
+| **温度制御デモ（1入力 Mamdani）** | **応用ショーケース** |
+| [![温度制御デモ](images/screenshot-temperature.png)](https://lutelute.github.io/lec-fuzzy/demos/fuzzy_temperature_controller.html) | [![応用ショーケース](images/screenshot-applications.png)](https://lutelute.github.io/lec-fuzzy/content/fuzzy-applications.html) |
+
+<sub>画像クリックで実際のページが開きます。</sub>
 
 ---
 
@@ -40,6 +69,9 @@
 lec-fuzzy/
 ├── index.html                … 教材トップ（ポータル）
 ├── README.md
+├── LICENSE                   … CC BY 4.0
+├── CITATION.cff              … 引用情報（GitHub "Cite this repository"）
+├── images/                   … READMEスクリーンショット
 ├── demos/                    … 触って動かす体験デモ
 │   ├── fuzzy_temperature_controller.html   … Step 1（1入力）
 │   └── fuzzy_logic_controller.html         … Step 2（2入力・制御曲面）
@@ -116,4 +148,16 @@ lec-fuzzy/
 
 ---
 
-教育用教材。授業・自習での利用・改変は自由です。実用例の年代・出典は調査に基づきます（二次情報を含む）。
+## 📄 ライセンス
+
+本教材は **[Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE)** で公開しています。
+クレジットを表示すれば、**改変・再配布・商用利用も自由**です。授業・自習でご自由にお使いください。
+
+> 応用ショーケースが引用する実在の製品・年代・研究は、各出典元に帰属します（教育目的での引用）。
+
+## 引用 / Citation
+
+利用・引用の際は以下をご記載ください（GitHub の **"Cite this repository"** ボタンからも取得できます）。
+
+> lutelute (PWS Lab). *ファジィ制御 インタラクティブ教材（制御理論教科書 併用版）*. 2026.
+> https://github.com/lutelute/lec-fuzzy

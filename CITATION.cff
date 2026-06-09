@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: "ファジィ制御 インタラクティブ教材（制御理論教科書 併用版）"
+message: "この教材を利用・引用される場合は、以下の情報をご記載ください。"
+type: software
+authors:
+  - name: "lutelute (PWS Lab)"
+repository-code: "https://github.com/lutelute/lec-fuzzy"
+url: "https://lutelute.github.io/lec-fuzzy/"
+abstract: >-
+  制御工学の教科書で PID 制御まで学んだ学習者向けに、ファジィ制御を
+  「ファジィ化 → Mamdani 推論 → デファジィ化」の流れで体験する
+  インタラクティブ教材スイート。体験デモ・講義ノート・応用ショーケース・
+  教員ガイドを含み、すべて単一 HTML・外部依存なしで動作する。
+keywords:
+  - fuzzy control
+  - Mamdani inference
+  - control engineering
+  - educational material
+  - interactive demo
+license: CC-BY-4.0
+date-released: 2026-06-08
