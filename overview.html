@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教材オーバービュー（1枚） — ファジィ制御</title>
+<style>
+  :root {
+    --bg: #f6f4ee; --surface: #ffffff; --surface-2: #efece4;
+    --text-1: #1a1a1a; --text-2: #5f5e5a; --text-3: #888780;
+    --border: rgba(0,0,0,0.10); --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB; --info-text: #0C447C;
+    --blue: #378ADD; --blue-deep: #0C447C; --amber: #EF9F27; --red: #E24B4A;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --surface: #1f1f1d; --surface-2: #2a2a27;
+      --text-1: #f0eee8; --text-2: #b4b2a9; --text-3: #888780;
+      --border: rgba(255,255,255,0.10); --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C; --info-text: #B5D4F4; --blue: #5BA0E8; --blue-deep: #B5D4F4;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 13px; line-height: 1.55; }
+  .sheet { max-width: 900px; margin: 0 auto; padding: 20px 22px 26px; }
+  .print-hint { font-size: 11px; color: var(--text-3); text-align: right; margin-bottom: 6px; }
+  .print-hint a { color: var(--blue-deep); }
+
+  header.h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 2px solid var(--text-1); padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  header.h h1 { font-size: 21px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  header.h .sub { font-size: 11px; color: var(--text-2); }
+
+  .lead { font-size: 12.5px; color: var(--text-2); margin: 0 0 14px; }
+  .lead b { color: var(--text-1); }
+
+  h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue-deep); margin: 16px 0 7px; }
+
+  /* flow map */
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .fbox { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: 8px; padding: 9px 11px; position: relative; }
+  .fbox .step { font-size: 9.5px; font-weight: 700; color: var(--blue); letter-spacing: 0.05em; }
+  .fbox .ft { font-size: 13px; font-weight: 600; margin: 2px 0; }
+  .fbox .fd { font-size: 10.5px; color: var(--text-2); }
+  .fbox .fn { font-family: var(--font-mono); font-size: 9px; color: var(--text-3); margin-top: 5px; word-break: break-all; }
+
+  /* pipeline */
+  .pipe { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 6px; }
+  .pstep { background: var(--info-bg); border-radius: 8px; padding: 9px 12px; }
+  .pstep .pt { font-size: 12.5px; font-weight: 700; color: var(--info-text); }
+  .pstep .pd { font-size: 10.5px; color: var(--info-text); opacity: 0.92; margin-top: 2px; }
+  .arrow { display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-3); font-weight: 700; }
+
+  /* two-col */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  th, td { border: 0.5px solid var(--border); padding: 5px 8px; text-align: left; vertical-align: top; }
+  thead th { background: var(--surface-2); font-weight: 700; font-size: 10.5px; }
+  td.c { color: var(--text-1); font-weight: 600; }
+  td.f { color: var(--text-2); }
+  .mono { font-family: var(--font-mono); font-size: 10.5px; }
+  math { font-size: 1.0em; }
+
+  .keymsg { background: var(--surface); border: 1px solid var(--blue); border-left-width: 4px; border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 14px 0 4px; font-size: 12.5px; }
+  .keymsg b { color: var(--blue-deep); }
+
+  .foot { font-size: 10px; color: var(--text-3); text-align: center; margin-top: 16px; border-top: 0.5px solid var(--border); padding-top: 8px; }
+
+  @media print {
+    :root { --bg:#fff; --surface:#fff; --surface-2:#f0eee8; --info-bg:#E6F1FB; --info-text:#0C447C; --text-1:#000; --text-2:#333; }
+    body { font-size: 11.5px; }
+    .print-hint { display: none; }
+    .sheet { max-width: none; padding: 0; }
+    a { color: #000; text-decoration: none; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  @media (max-width: 720px) {
+    .flow { grid-template-columns: 1fr 1fr; }
+    .cols { grid-template-columns: 1fr; }
+    .pipe { grid-template-columns: 1fr; }
+    .pipe .arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="print-hint">配布・印刷用の 1 枚（Ctrl/⌘+P で PDF 化）　·　<a href="index.html">↩ 教材トップ</a></div>
+
+  <header class="h">
+    <h1>ファジィ制御 インタラクティブ教材</h1>
+    <span class="sub">制御理論教科書 併用版 · 全 8 ファイル · 外部依存なし</span>
+  </header>
+
+  <p class="lead">
+    PID まで学んだ学習者向けに、ファジィ制御を <b>ファジィ化 → 推論（Mamdani）→ デファジィ化</b> の流れで体験する教材。
+    ブラウザだけで動くデモ 3 種＋講義ノート＋ガイド類で構成。<b>所要 60–90 分</b>。
+  </p>
+
+  <h2>学習フロー</h2>
+  <div class="flow">
+    <div class="fbox"><div class="step">STEP 1</div><div class="ft">温度制御デモ</div><div class="fd">1 入力で推論の流れを体感</div><div class="fn">fuzzy_temperature_controller.html</div></div>
+    <div class="fbox"><div class="step">STEP 2</div><div class="ft">PD 型制御デモ</div><div class="fd">2 入力・制御曲面と PID の接続</div><div class="fn">fuzzy_logic_controller.html</div></div>
+    <div class="fbox"><div class="step">STEP 3</div><div class="ft">講義ノート</div><div class="fd">理論・数式・演習 7 問</div><div class="fn">lecture-notes.html</div></div>
+    <div class="fbox"><div class="step">STEP 4</div><div class="ft">応用ショーケース</div><div class="fd">実用例・最新動向のデモ</div><div class="fn">fuzzy-applications.html</div></div>
+  </div>
+
+  <h2>ファジィ推論の 3 ステップ</h2>
+  <div class="pipe">
+    <div class="pstep"><div class="pt">① ファジィ化</div><div class="pd">観測値 → 各集合への帰属度 μ（例：18°C は Cold 0.2 / Warm 0.43）</div></div>
+    <div class="arrow">→</div>
+    <div class="pstep"><div class="pt">② ルール推論</div><div class="pd">IF–THEN を発火（前件 min）、結論を重ねる（合成 max）</div></div>
+    <div class="arrow">→</div>
+    <div class="pstep"><div class="pt">③ デファジィ化</div><div class="pd">合成集合の重心 = 確定出力（例：ファン速度 41%）</div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <h2>制御理論教科書との対応</h2>
+      <table>
+        <thead><tr><th>古典制御</th><th>ファジィ制御</th></tr></thead>
+        <tbody>
+          <tr><td class="c">偏差 e, ė</td><td class="f">ファジィ化の入力</td></tr>
+          <tr><td class="c">PD 則 u=Kp·e+Kd·ė</td><td class="f">PD 型ファジィ制御器</td></tr>
+          <tr><td class="c">定ゲイン</td><td class="f">制御曲面 u(e,ė)（非線形）</td></tr>
+          <tr><td class="c">ゲイン調整</td><td class="f">ルール表・MF 形状</td></tr>
+          <tr><td class="c">モデル G(s) 必須</td><td class="f">モデル不要（言葉で記述）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h2>ファイル構成</h2>
+      <table>
+        <tbody>
+          <tr><td class="mono">index.html</td><td class="f">教材トップ</td></tr>
+          <tr><td class="mono">lecture-notes.html</td><td class="f">講義ノート（理論・演習）</td></tr>
+          <tr><td class="mono">fuzzy_temperature_…html</td><td class="f">温度デモ（Step 1）</td></tr>
+          <tr><td class="mono">fuzzy_logic_…html</td><td class="f">PD デモ（Step 2）</td></tr>
+          <tr><td class="mono">fuzzy-applications.html</td><td class="f">応用ショーケース</td></tr>
+          <tr><td class="mono">how-to-use.html</td><td class="f">デモ操作ガイド</td></tr>
+          <tr><td class="mono">teacher-guide.html</td><td class="f">教員用ガイド＋解答</td></tr>
+          <tr><td class="mono">README.md</td><td class="f">構成・使い方</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="keymsg">
+    <b>この教材の核心：</b>PD 型ファジィ制御器は、制御曲面の原点まわりの傾きが等価 PD ゲイン（本教材では <math><mrow><msub><mi>K</mi><mi>p</mi></msub><mo>≈</mo><msub><mi>K</mi><mi>d</mi></msub><mo>≈</mo><mn>1.45</mn></mrow></math>）に一致する <b>「飽和付き非線形 PD 制御」</b>。古典制御の延長として理解できる。
+  </div>
+
+  <div class="foot">
+    Mamdani 推論（三角形/台形 MF · max–min 合成 · 重心デファジィ化）· 教育用・改変自由　|　同一フォルダに置けば相互リンクで連携
+  </div>
+</div>
+</body>
+</html>

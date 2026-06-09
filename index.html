@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ファジィ制御 — 制御理論教科書 併用教材</title>
+<style>
+  :root {
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-2: #efece4;
+    --text-1: #1a1a1a;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --border: rgba(0,0,0,0.10);
+    --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB;
+    --info-text: #0C447C;
+    --blue: #378ADD;
+    --blue-deep: #0C447C;
+    --amber: #EF9F27;
+    --red: #E24B4A;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614;
+      --surface: #1f1f1d;
+      --surface-2: #2a2a27;
+      --text-1: #f0eee8;
+      --text-2: #b4b2a9;
+      --text-3: #888780;
+      --border: rgba(255,255,255,0.10);
+      --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C;
+      --info-text: #B5D4F4;
+      --blue: #5BA0E8;
+      --blue-deep: #B5D4F4;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 14px; line-height: 1.6; }
+  .app { max-width: 1080px; margin: 0 auto; padding: 22px 20px 40px; }
+  a { color: var(--blue-deep); }
+
+  /* hero */
+  .hero { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 26px 28px; margin-bottom: 16px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); font-weight: 500; margin: 0 0 8px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
+  .lead { font-size: 15px; color: var(--text-2); margin: 0 0 14px; max-width: 70ch; }
+  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .tag { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--surface-2); color: var(--text-2); border: 0.5px solid var(--border); }
+  .tag.accent { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
+
+  /* section */
+  section { margin-top: 26px; }
+  .sec-hdr { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .sec-hdr h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; color: var(--text-1); }
+  .sec-hdr .sec-sub { font-size: 11px; color: var(--text-3); }
+
+  /* flow cards */
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .step { display: flex; flex-direction: column; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 16px 14px; text-decoration: none; color: inherit; transition: transform 0.08s, border-color 0.12s, box-shadow 0.12s; }
+  .step:hover { transform: translateY(-2px); border-color: var(--border-2); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+  .step-num { font-size: 11px; font-weight: 600; color: var(--blue); letter-spacing: 0.1em; }
+  .step-title { font-size: 15px; font-weight: 600; margin: 6px 0 6px; }
+  .step-desc { font-size: 12.5px; color: var(--text-2); flex: 1; }
+  .step-go { font-size: 11px; color: var(--blue-deep); margin-top: 12px; font-weight: 500; }
+
+  /* table */
+  .table-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 0.5px solid var(--border); vertical-align: top; }
+  thead th { background: var(--surface-2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.classic { color: var(--text-1); font-weight: 500; }
+  td.fuzzy { color: var(--text-2); }
+  td.where { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  td.where a { color: var(--blue-deep); text-decoration: none; border-bottom: 1px solid transparent; }
+  td.where a:hover { border-bottom-color: var(--border-2); }
+  math { font-size: 1.02em; }
+
+  /* map / positioning */
+  .map { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .map-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .map-card.hot { border-color: var(--blue); border-width: 1px; background: var(--info-bg); }
+  .map-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 8px; color: var(--text-2); }
+  .map-card.hot h3 { color: var(--info-text); }
+  .map-card ul { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 13px; }
+  .map-card.hot ul { color: var(--info-text); }
+  .map-card li { margin-bottom: 4px; }
+  .map-note { font-size: 12.5px; color: var(--text-2); margin-top: 12px; line-height: 1.7; max-width: 78ch; }
+
+  /* files */
+  .files { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .file { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 13px 15px; text-decoration: none; color: inherit; transition: border-color 0.12s; }
+  .file:hover { border-color: var(--border-2); }
+  .file-ico { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); margin-top: 1px; min-width: 18px; }
+  .file-name { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; color: var(--text-1); }
+  .file-desc { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+  .footer { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 34px; line-height: 1.8; }
+
+  @media (max-width: 860px) {
+    .flow { grid-template-columns: 1fr; }
+    .map { grid-template-columns: 1fr; }
+    .files { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <p class="eyebrow">制御工学 補助教材 · インタラクティブ</p>
+    <h1>ファジィ制御を「触って」理解する</h1>
+    <p class="lead">
+      制御理論の教科書で <strong>PID 制御</strong> までを学んだ人を対象に、ファジィ制御を
+      <strong>ファジィ化 → ルール推論（Mamdani）→ デファジィ化</strong> の流れに沿って体験する教材です。
+      数式モデルに頼らず「もし温度が高ければ、ファンを速く」という言葉のルールで制御を組み立てる考え方を、
+      ブラウザだけで動くインタラクティブなデモで確かめます。教科書の古典制御と対比しながら読み進めてください。
+    </p>
+    <div class="meta-row">
+      <span class="tag accent">前提: 古典制御（偏差・PID）の基礎</span>
+      <span class="tag">所要 60–90 分</span>
+      <span class="tag">依存ライブラリなし（HTML を開くだけ）</span>
+      <span class="tag">日本語</span>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-hdr">
+      <h2>学習の流れ</h2>
+      <span class="sec-sub">易しい順に進み、最後に応用へ。デモは何度でも触って構いません</span>
+    </div>
+    <div class="flow">
+      <a class="step" href="fuzzy_temperature_controller.html">
+        <span class="step-num">STEP 1</span>
+        <span class="step-title">温度制御デモ</span>
+        <span class="step-desc">入力 1 つ（温度）の最小構成。Cold / Warm / Hot のメンバーシップ関数から、ファン速度が決まるまでの一連の流れを 1 画面で追えます。「ファジィ化・推論・デファジィ化」を最初に体感する章。</span>
+        <span class="step-go">1 入力 Mamdani を開く →</span>
+      </a>
+      <a class="step" href="fuzzy_logic_controller.html">
+        <span class="step-num">STEP 2</span>
+        <span class="step-title">PD 型制御デモ</span>
+        <span class="step-desc">入力 2 つ（偏差 e と偏差微分 ė）。5×5 のルール表と制御曲面 u(e, ė) を操作し、ファジィ制御器が <em>非線形な PD 制御則</em> を実現していることを目で確かめます。教科書の PID との接続点。</span>
+        <span class="step-go">2 入力・制御曲面を開く →</span>
+      </a>
+      <a class="step" href="lecture-notes.html">
+        <span class="step-num">STEP 3</span>
+        <span class="step-title">講義ノート</span>
+        <span class="step-desc">デモで見た内容を数式で整理します。ファジィ集合・三角形 MF・min–max 合成・重心法を定義し、PD 制御との関係を導出。各節に教科書併用のサイドノートと演習問題を用意。</span>
+        <span class="step-go">理論と演習へ →</span>
+      </a>
+      <a class="step" href="fuzzy-applications.html">
+        <span class="step-num">発展</span>
+        <span class="step-title">応用ショーケース</span>
+        <span class="step-desc">世の中の実用例（家電・鉄道・産業）と最新動向（Takagi–Sugeno・Type-2・ニューロファジィ・XAI・再エネ）を一望。触って試せるミニデモ 3 種（ファジィ洗濯機・TS 局所線形・Type-1/2）つき。</span>
+        <span class="step-go">実用例と最新動向へ →</span>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-hdr">
+      <h2>制御理論の教科書との対応</h2>
+      <span class="sec-sub">古典制御で学んだ概念が、ファジィ制御のどこに対応するか</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:34%">教科書（古典制御）で学ぶ概念</th>
+            <th style="width:42%">ファジィ制御での対応</th>
+            <th style="width:24%">この教材で触れる場所</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="classic">偏差 <math><mrow><mi>e</mi><mo>=</mo><mi>r</mi><mo>−</mo><mi>y</mi></mrow></math></td>
+            <td class="fuzzy">ファジィ化する入力変数（温度偏差・誤差そのもの）</td>
+            <td class="where"><a href="fuzzy_temperature_controller.html">温度デモ</a> / <a href="fuzzy_logic_controller.html">PD デモ</a></td>
+          </tr>
+          <tr>
+            <td class="classic">PD 制御則 <math><mrow><mi>u</mi><mo>=</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math></td>
+            <td class="fuzzy">入力に <math><mrow><mi>e</mi></mrow></math> と <math><mrow><mover><mi>e</mi><mo>˙</mo></mover></mrow></math> をとる PD 型ファジィ制御器</td>
+            <td class="where"><a href="fuzzy_logic_controller.html">PD デモ</a> / §6</td>
+          </tr>
+          <tr>
+            <td class="classic">ゲイン <math><mrow><msub><mi>K</mi><mi>p</mi></msub><mo>,</mo><msub><mi>K</mi><mi>d</mi></msub></mrow></math> の調整</td>
+            <td class="fuzzy">ルール表の中身とメンバーシップ関数の形（暗黙のゲイン設計）</td>
+            <td class="where"><a href="fuzzy_logic_controller.html">PD デモ</a></td>
+          </tr>
+          <tr>
+            <td class="classic">線形フィードバック（定ゲイン）</td>
+            <td class="fuzzy">制御曲面 <math><mrow><mi>u</mi><mo>(</mo><mi>e</mi><mo>,</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>)</mo></mrow></math> — 飽和や鈍感帯を含む<em>非線形</em>写像</td>
+            <td class="where"><a href="fuzzy_logic_controller.html">PD デモ</a> / §6</td>
+          </tr>
+          <tr>
+            <td class="classic">静特性・入出力特性</td>
+            <td class="fuzzy">伝達特性 <math><mrow><mi>u</mi><mo>(</mo><mi>T</mi><mo>)</mo></mrow></math>（温度→ファン速度のカーブ）</td>
+            <td class="where"><a href="fuzzy_temperature_controller.html">温度デモ</a></td>
+          </tr>
+          <tr>
+            <td class="classic">オンオフ制御 / PID 制御</td>
+            <td class="fuzzy">IF–THEN ルールによる知識ベース制御</td>
+            <td class="where">§1, §4</td>
+          </tr>
+          <tr>
+            <td class="classic">プラントモデル <math><mrow><mi>G</mi><mo>(</mo><mi>s</mi><mo>)</mo></mrow></math> が必要</td>
+            <td class="fuzzy">数式モデル不要 — 熟練者の制御則を言葉で記述</td>
+            <td class="where">§1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-hdr">
+      <h2>制御方式の地図の中の位置づけ</h2>
+      <span class="sec-sub">ファジィ制御はモデルベース制御と相補的</span>
+    </div>
+    <div class="map">
+      <div class="map-card">
+        <h3>モデルベース制御（教科書の主軸）</h3>
+        <ul>
+          <li>古典制御：PID・周波数応答・根軌跡</li>
+          <li>現代制御：状態空間・最適/ロバスト制御</li>
+          <li>強み：数式モデルがあれば安定性・性能を理論保証</li>
+        </ul>
+      </div>
+      <div class="map-card hot">
+        <h3>知識ベース制御（この教材）</h3>
+        <ul>
+          <li>ファジィ制御：IF–THEN ルール ← <strong>ここ</strong></li>
+          <li>ニューロ制御・学習制御 など</li>
+          <li>強み：正確なモデルが無くても熟練者の勘を実装できる</li>
+        </ul>
+      </div>
+    </div>
+    <p class="map-note">
+      古典制御が「プラントの数式モデル <math><mrow><mi>G</mi><mo>(</mo><mi>s</mi><mo>)</mo></mrow></math> から制御則を設計する」のに対し、
+      ファジィ制御は「人が言葉で持っている制御知識（高ければ下げる、急に近づいたら緩める…）をそのまま規則にする」アプローチです。
+      両者は対立するものではなく、PD 型ファジィ制御のように<strong>古典制御の枠組みを非線形に拡張する</strong>形で繋がります。
+      この接続を §6 と PD デモで確かめるのが、本教材の山場です。
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-hdr">
+      <h2>教材ファイル一覧</h2>
+      <span class="sec-sub">すべて同じフォルダに置けば相互リンクで行き来できます</span>
+    </div>
+    <div class="files">
+      <a class="file" href="fuzzy_temperature_controller.html">
+        <span class="file-ico">1D</span>
+        <span>
+          <span class="file-name">fuzzy_temperature_controller.html</span>
+          <span class="file-desc">Step 1：1 入力 Mamdani 温度制御デモ</span>
+        </span>
+      </a>
+      <a class="file" href="fuzzy_logic_controller.html">
+        <span class="file-ico">2D</span>
+        <span>
+          <span class="file-name">fuzzy_logic_controller.html</span>
+          <span class="file-desc">Step 2：PD 型・5×5 ルール・制御曲面デモ</span>
+        </span>
+      </a>
+      <a class="file" href="lecture-notes.html">
+        <span class="file-ico">§</span>
+        <span>
+          <span class="file-name">lecture-notes.html</span>
+          <span class="file-desc">Step 3：講義ノート（理論・数式・教科書サイドノート・演習）</span>
+        </span>
+      </a>
+      <a class="file" href="fuzzy-applications.html">
+        <span class="file-ico">★</span>
+        <span>
+          <span class="file-name">fuzzy-applications.html</span>
+          <span class="file-desc">発展：応用ショーケース（実用例・最新動向・ミニデモ3種）</span>
+        </span>
+      </a>
+      <a class="file" href="how-to-use.html">
+        <span class="file-ico">?</span>
+        <span>
+          <span class="file-name">how-to-use.html</span>
+          <span class="file-desc">デモ操作ガイド（学生向け・観察ポイント）</span>
+        </span>
+      </a>
+      <a class="file" href="teacher-guide.html">
+        <span class="file-ico">T</span>
+        <span>
+          <span class="file-name">teacher-guide.html</span>
+          <span class="file-desc">教員用ガイド＋模範解答（授業展開・時間配分）</span>
+        </span>
+      </a>
+      <a class="file" href="overview.html">
+        <span class="file-ico">1p</span>
+        <span>
+          <span class="file-name">overview.html</span>
+          <span class="file-desc">配布用サマリー1枚（印刷対応）</span>
+        </span>
+      </a>
+      <a class="file" href="README.md">
+        <span class="file-ico">md</span>
+        <span>
+          <span class="file-name">README.md</span>
+          <span class="file-desc">教材構成・使い方・対象読者</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <div class="footer">
+    ファジィ制御 インタラクティブ教材 · 制御理論教科書 併用版<br>
+    Mamdani 推論（三角形/台形 MF · max–min 合成 · 重心デファジィ化）· 教育用・外部依存なし
+  </div>
+
+</div>
+</body>
+</html>

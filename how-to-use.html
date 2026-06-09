@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>デモ操作ガイド — ファジィ制御教材</title>
+<style>
+  :root {
+    --bg: #f6f4ee; --surface: #ffffff; --surface-2: #efece4;
+    --text-1: #1a1a1a; --text-2: #5f5e5a; --text-3: #888780;
+    --border: rgba(0,0,0,0.10); --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB; --info-text: #0C447C;
+    --blue: #378ADD; --blue-deep: #0C447C;
+    --green-bg: #E4F2E4; --green-text: #1F5B2E; --green: #3C9A50;
+    --amber-bg: #FAEEDA; --amber-text: #854F0B; --red: #E24B4A;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --surface: #1f1f1d; --surface-2: #2a2a27;
+      --text-1: #f0eee8; --text-2: #b4b2a9; --text-3: #888780;
+      --border: rgba(255,255,255,0.10); --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C; --info-text: #B5D4F4;
+      --blue: #5BA0E8; --blue-deep: #B5D4F4;
+      --green-bg: #1e3a24; --green-text: #A5D6A7;
+      --amber-bg: #3a2f1c; --amber-text: #E8C88A;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 15px; line-height: 1.75; }
+  .app { max-width: 1080px; margin: 0 auto; padding: 18px 20px 60px; }
+  .lec-nav { display: flex; gap: 14px; margin-bottom: 16px; padding: 2px 4px; font-size: 12px; flex-wrap: wrap; align-items: center; }
+  .lec-nav a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color 0.1s, border-color 0.1s; }
+  .lec-nav a:hover { color: var(--text-1); border-bottom-color: var(--border-2); }
+  .lec-nav a.home { color: var(--text-2); font-weight: 500; }
+  .lec-nav .sep { color: var(--text-3); opacity: 0.5; }
+  .doc { max-width: 820px; margin: 0 auto; }
+
+  .title-block { border-bottom: 0.5px solid var(--border-2); padding-bottom: 18px; margin-bottom: 8px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); font-weight: 500; margin: 0 0 6px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .title-block p { color: var(--text-2); margin: 4px 0 0; font-size: 14.5px; }
+
+  h2.sec { font-size: 19px; font-weight: 600; margin: 38px 0 10px; padding-top: 14px; border-top: 0.5px solid var(--border); }
+  h2.sec .ic { color: var(--blue); margin-right: 8px; }
+  p { margin: 10px 0; }
+  strong { font-weight: 600; }
+
+  .open-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue-deep); color: #fff; padding: 9px 16px; border-radius: 8px; text-decoration: none; font-size: 13.5px; font-weight: 600; margin: 8px 0; }
+  @media (prefers-color-scheme: dark) { .open-btn { color: #0b1b2e; } }
+  .open-btn:hover { opacity: 0.9; }
+
+  /* panel cards */
+  .panel-doc { display: flex; gap: 14px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin: 12px 0; }
+  .panel-doc .pn { flex-shrink: 0; width: 26px; height: 26px; border-radius: 7px; background: var(--info-bg); color: var(--info-text); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .panel-doc .pb { flex: 1; }
+  .panel-doc .pt { font-weight: 600; font-size: 14.5px; margin-bottom: 2px; }
+  .panel-doc .pd { font-size: 13.5px; color: var(--text-2); }
+  .panel-doc .pd b { color: var(--text-1); font-weight: 600; }
+
+  .try { background: var(--green-bg); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; font-size: 13.5px; color: var(--green-text); }
+  .try .c-h { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .try ol { margin: 4px 0 0; padding-left: 20px; }
+  .try li { margin-bottom: 3px; }
+  .try math { color: inherit; }
+
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0; font-size: 12.5px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+  .sw { width: 22px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  .tip { background: var(--amber-bg); border-left: 3px solid var(--amber-text); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; font-size: 13.5px; color: var(--amber-text); }
+  .tip .c-h { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  .footer { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 44px; padding-top: 18px; border-top: 0.5px solid var(--border); line-height: 1.8; }
+  .footer a { color: var(--blue-deep); }
+  @media (max-width: 720px) { body { font-size: 14.5px; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="lec-nav">
+    <a class="home" href="index.html">← 教材トップ</a>
+    <span class="sep">·</span>
+    <a href="lecture-notes.html">講義ノート</a>
+    <a href="fuzzy_temperature_controller.html">温度デモ</a>
+    <a href="fuzzy_logic_controller.html">PDデモ</a>
+  </nav>
+
+  <div class="doc">
+    <div class="title-block">
+      <p class="eyebrow">学生用 · デモの歩き方</p>
+      <h1>デモ操作ガイド</h1>
+      <p>各パネルの意味・操作方法・「どこに注目するか」を、画面の並びに沿って説明します</p>
+    </div>
+
+    <p>
+      2 つのデモは<strong>すべての数字がリアルタイムに連動</strong>します。入力を変えると、ファジィ化・推論・デファジィ化のすべてのパネルが同時に更新されるので、
+      「入力を少し動かす → どのパネルがどう変わるか」を追うのが理解の近道です。各デモの最後に「やってみよう」課題を置きました。
+    </p>
+
+    <!-- ===== 温度デモ ===== -->
+    <h2 class="sec"><span class="ic">1.</span>温度制御デモ（1 入力）</h2>
+    <a class="open-btn" href="fuzzy_temperature_controller.html">温度デモを開く ↗</a>
+    <p>入力は温度ひとつ。「Cold / Warm / Hot」から「ファン速度」が決まるまでを 4 つのパネルで見ます。</p>
+
+    <div class="panel-doc"><div class="pn">①</div><div class="pb"><div class="pt">上部：温度スライダー と ファン速度</div><div class="pd"><b>温度（°C）</b>を左右に動かすと、青いカード<b>ファン速度</b>に最終出力（%）が出ます。これがファジィ制御器の「答え」。</div></div></div>
+    <div class="panel-doc"><div class="pn">②</div><div class="pb"><div class="pt">入力 MF — 温度のファジィ化</div><div class="pd">Cold / Warm / Hot の<b>メンバーシップ関数</b>（帰属の度合い）。点線の縦線が今の温度、色つきの丸が各集合への <math><mi>μ</mi></math> 値。1 つの温度が<b>複数の集合に同時に属する</b>のがポイント。</div></div></div>
+    <div class="panel-doc"><div class="pn">③</div><div class="pb"><div class="pt">出力 MF ＋ Mamdani 合成</div><div class="pd"><b>網掛け</b>＝各ルールを発火強度で頭打ちにした形（α カット）、<b>太線</b>＝それらを重ねた合成集合、<b>縦線</b>＝その重心。重心の位置がファン速度になります。</div></div></div>
+    <div class="panel-doc"><div class="pn">④</div><div class="pb"><div class="pt">ルール（クリックで結論部を変更）</div><div class="pd">3 本の IF–THEN ルール。各カードの<b>バーの長さ＝発火強度</b>。結論部ボタン（Slow/Medium/Fast）をクリックすると後件部が変わり、制御の性格が変化します。</div></div></div>
+    <div class="panel-doc"><div class="pn">⑤</div><div class="pb"><div class="pt">伝達特性 u(T)</div><div class="pd">温度→ファン速度の<b>入出力カーブ</b>。点が現在の動作点。グラフを<b>クリック／ドラッグ</b>しても温度を設定できます。直線でなく<b>滑らかな非線形</b>なのが見どころ。</div></div></div>
+
+    <div class="legend">
+      <span><span class="sw" style="background:#378ADD"></span>Cold / Slow（青）</span>
+      <span><span class="sw" style="background:#EF9F27"></span>Warm / Medium（橙）</span>
+      <span><span class="sw" style="background:#E24B4A"></span>Hot / Fast（赤）</span>
+    </div>
+
+    <div class="try">
+      <div class="c-h">やってみよう</div>
+      <ol>
+        <li>温度を <b>18°C</b> に合わせる。パネル②で Cold と Warm の<b>両方</b>に丸が立つことを確認（≈0.20 と 0.43）。</li>
+        <li>パネル③で、Slow と Medium が違う高さで網掛けされ、重心がその間に来ることを見る。ファン速度は約 <b>41%</b>。</li>
+        <li>ルール R2 の結論を <b>Medium → Fast</b> に変えると、中温域のカーブ（パネル⑤）がどう持ち上がるか観察（22°C で 50%→約 84%）。</li>
+      </ol>
+    </div>
+
+    <!-- ===== PDデモ ===== -->
+    <h2 class="sec"><span class="ic">2.</span>PD 型制御デモ（2 入力・制御曲面）</h2>
+    <a class="open-btn" href="fuzzy_logic_controller.html">PD デモを開く ↗</a>
+    <p>入力は<b>偏差 e</b> と<b>偏差の変化 ė</b> の 2 つ。出力は制御入力 u。これは古典制御の PD 制御に対応します。</p>
+
+    <div class="panel-doc"><div class="pn">①</div><div class="pb"><div class="pt">上部：e / ė スライダー、確定出力 u、プリセット</div><div class="pd"><math><mi>e</mi></math> と <math><mover><mi>e</mi><mo>˙</mo></mover></math> を設定すると青カードに <b>u</b>。<b>標準PD / アグレッシブ / ソフト / クリア</b>のプリセットでルール表を一括変更できます。</div></div></div>
+    <div class="panel-doc"><div class="pn">②</div><div class="pb"><div class="pt">制御曲面 u(e, ė)</div><div class="pd">全動作点での出力を色で塗った<b>制御則の地図</b>。<b>青＝正の出力、赤＝負、白＝ゼロ</b>。丸い印が現在の動作点で、<b>クリック／ドラッグ</b>で動かせます。右のカラーバーが対応表。</div></div></div>
+    <div class="panel-doc"><div class="pn">③</div><div class="pb"><div class="pt">Mamdani 合成 → 重心デファジィ化</div><div class="pd">温度デモの③と同じ読み方。発火した複数ルールの α カット（網掛け）→ 合成（太線）→ 重心（縦線 u）。</div></div></div>
+    <div class="panel-doc"><div class="pn">④</div><div class="pb"><div class="pt">ルール表 5×5</div><div class="pd">25 本のルールを表に。<b>発火中のセルは枠が強調</b>され、上部に「発火 n / 25」。セルを<b>クリックするたび</b>に後件部が NB→NS→ZE→PS→PB と循環し、曲面②が即座に変形します。</div></div></div>
+    <div class="panel-doc"><div class="pn">⑤</div><div class="pb"><div class="pt">入力 MF — e ／ ė</div><div class="pd">5 つの言語値 <b>NB / NS / ZE / PS / PB</b>（負大〜正大）の三角形 MF。点線が現在値、丸が各 μ。最大 2 つの言語値に同時に属します。</div></div></div>
+
+    <div class="legend">
+      <span><span class="sw" style="background:#378ADD"></span>u 正（青）</span>
+      <span><span class="sw" style="background:#F1EFE8;border:0.5px solid #ccc"></span>u ≈ 0（白）</span>
+      <span><span class="sw" style="background:#E24B4A"></span>u 負（赤）</span>
+    </div>
+
+    <div class="try">
+      <div class="c-h">やってみよう</div>
+      <ol>
+        <li>制御曲面②の<b>対角線（左下→右上）</b>が白っぽい（u≈0）ことを確認。これは <math><mrow><mi>e</mi><mo>+</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>≈</mo><mn>0</mn></mrow></math> の線。</li>
+        <li>プリセットを <b>標準PD → アグレッシブ → ソフト</b>と切替え、原点付近の色の変化の<b>急さ（＝ゲイン）</b>と中央の白い領域（不感帯）の広さを比べる。</li>
+        <li>ルール表④の中央セルを 1 つだけ書き換え、曲面②が局所的に凹む／膨らむのを見る。<b>ルール＝曲面の彫刻</b>。</li>
+      </ol>
+    </div>
+
+    <div class="tip">
+      <div class="c-h">うまく表示されないとき</div>
+      ダブルクリックで開くだけで動きます（ネット接続・インストール不要）。図が出ない場合はブラウザを最新版に更新してください（数式表示に MathML、グラフに SVG を使用）。スマホでも動きますが、操作は PC 画面を推奨します。
+    </div>
+
+    <h2 class="sec"><span class="ic">3.</span>次に</h2>
+    <p>操作に慣れたら<a href="lecture-notes.html">講義ノート</a>で理論を、<a href="fuzzy-applications.html">応用ショーケース</a>で実用例と最新動向を見てみましょう。</p>
+
+    <div class="footer">
+      デモ操作ガイド · <a href="index.html">教材トップへ</a><br>
+      温度デモ・PD デモはともに Mamdani 推論（max–min 合成・重心デファジィ化）
+    </div>
+  </div>
+</div>
+</body>
+</html>

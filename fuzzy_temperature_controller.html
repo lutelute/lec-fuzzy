@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuzzy Temperature Controller (1D Mamdani Demo)</title>
+<style>
+  :root {
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-2: #efece4;
+    --text-1: #1a1a1a;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --border: rgba(0,0,0,0.10);
+    --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB;
+    --info-text: #0C447C;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614;
+      --surface: #1f1f1d;
+      --surface-2: #2a2a27;
+      --text-1: #f0eee8;
+      --text-2: #b4b2a9;
+      --text-3: #888780;
+      --border: rgba(255,255,255,0.10);
+      --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C;
+      --info-text: #B5D4F4;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
+  .app { max-width: 1320px; margin: 0 auto; padding: 16px 18px 28px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 2px; margin-bottom: 12px; flex-wrap: wrap; }
+  h1 { font-size: 16px; font-weight: 500; margin: 0; letter-spacing: -0.005em; }
+  .subtitle { font-size: 11px; color: var(--text-3); margin: 0; }
+  svg { display: block; }
+
+  /* KPI strip */
+  .kpi { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+  .kpi-card.accent { background: var(--info-bg); border-color: transparent; }
+  .kpi-label { font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
+  .kpi-card.accent .kpi-label { color: var(--info-text); opacity: 0.8; }
+  .kpi-row { display: flex; align-items: center; gap: 12px; margin-top: 7px; }
+  .kpi-val { font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 60px; text-align: right; }
+  .kpi-card.accent .kpi-val { font-size: 26px; color: var(--info-text); text-align: left; min-width: 0; margin-top: 4px; }
+
+  /* sliders */
+  input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; flex: 1; min-width: 0; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 3px; background: var(--border-2); border-radius: 2px; }
+  input[type="range"]::-moz-range-track { height: 3px; background: var(--border-2); border-radius: 2px; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; background: var(--text-1); border-radius: 50%; margin-top: -5.5px; cursor: pointer; }
+  input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; background: var(--text-1); border: none; border-radius: 50%; cursor: pointer; }
+
+  /* main grid */
+  .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+
+  /* panels */
+  .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .panel-hdr { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
+  .panel-title { font-size: 11px; font-weight: 500; color: var(--text-1); text-transform: uppercase; letter-spacing: 0.08em; }
+  .panel-hint { font-size: 10px; color: var(--text-3); }
+
+  /* rule cards */
+  .rule-card { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; transition: opacity 0.2s; }
+  .rule-card:last-child { margin-bottom: 0; }
+  .rule-row { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .rule-kw { font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .rule-term { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: inherit; border: none; }
+  .rule-btn { cursor: pointer; transition: transform 0.08s; }
+  .rule-btn:hover { transform: scale(1.05); }
+  .rule-bar-wrap { display: flex; align-items: center; gap: 10px; }
+  .rule-bar { flex: 1; height: 5px; background: var(--border-2); border-radius: 3px; overflow: hidden; }
+  .rule-bar-fill { height: 100%; transition: width 0.15s; }
+  .rule-mu { font-size: 11px; color: var(--text-2); font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+
+  /* transfer curve interactivity */
+  #transfer { touch-action: none; }
+  #transfer .hit { cursor: crosshair; }
+
+  /* lecture nav */
+  .lec-nav { display: flex; gap: 14px; margin-bottom: 10px; padding: 2px 4px; font-size: 11px; flex-wrap: wrap; align-items: center; }
+  .lec-nav a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color 0.1s, border-color 0.1s; }
+  .lec-nav a:hover { color: var(--text-1); border-bottom-color: var(--border-2); }
+  .lec-nav a.home { color: var(--text-2); font-weight: 500; }
+  .lec-nav .sep { color: var(--text-3); opacity: 0.5; }
+
+  /* footer */
+  .footer { font-size: 10px; color: var(--text-3); text-align: center; margin-top: 14px; line-height: 1.7; }
+
+  @media (max-width: 880px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .kpi { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="lec-nav">
+    <a class="home" href="index.html">← 教材トップ</a>
+    <span class="sep">·</span>
+    <a href="lecture-notes.html">講義ノート</a>
+    <a href="fuzzy_logic_controller.html">PD型制御デモ</a>
+    <span class="sep">·</span>
+    <span style="color:var(--text-3)">Step 1 / 2 — 1入力・最小構成</span>
+  </nav>
+
+  <header>
+    <h1>Fuzzy Temperature Controller</h1>
+    <p class="subtitle">1-input Mamdani · Cold / Warm / Hot → Slow / Medium / Fast · trapezoidal & triangular MF · centroid</p>
+  </header>
+
+  <section class="kpi">
+    <div class="kpi-card">
+      <div class="kpi-label">温度 (°C)</div>
+      <div class="kpi-row">
+        <input type="range" min="0" max="40" step="0.5" value="22" id="t-in"/>
+        <div class="kpi-val" id="t-out">22.0</div>
+      </div>
+    </div>
+    <div class="kpi-card accent">
+      <div class="kpi-label">ファン速度</div>
+      <div class="kpi-val" id="u-out">0.0%</div>
+    </div>
+  </section>
+
+  <div class="main-grid">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">入力 MF — 温度のファジィ化</div>
+          <div class="panel-hint">Cold / Warm / Hot の μ 値</div>
+        </div>
+        <svg id="mf-in" viewBox="0 0 680 180" style="width: 100%;" role="img"></svg>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">出力 MF + Mamdani 合成</div>
+          <div class="panel-hint">網掛 = αカット / 太線 = 合成 / 縦線 = 重心</div>
+        </div>
+        <svg id="mf-out" viewBox="0 0 680 180" style="width: 100%;" role="img"></svg>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">ルール — 結論部をクリックで変更</div>
+        </div>
+        <div id="rules"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">伝達特性 u(T)</div>
+          <div class="panel-hint">クリック / ドラッグで温度設定</div>
+        </div>
+        <svg id="transfer" viewBox="0 0 680 300" style="width: 100%;" role="img"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Mamdani inference · input MFs: Cold = trap(0,0,10,20), Warm = tri(15,22,30), Hot = trap(25,35,40,40)<br>
+    output MFs: Slow = tri(0,0,50), Medium = tri(25,50,75), Fast = tri(50,100,100) · aggregation: max-of-min · centroid (du=0.5)
+  </div>
+
+</div>
+
+<script>
+(function() {
+  // ---- Palette (Cold/Slow=blue, Warm/Medium=amber, Hot/Fast=red) ----
+  const COLOR = [
+    { bg: '#E6F1FB', stroke: '#378ADD', text: '#0C447C' },  // 0: cool
+    { bg: '#FAEEDA', stroke: '#EF9F27', text: '#854F0B' },  // 1: warm
+    { bg: '#FCEBEB', stroke: '#E24B4A', text: '#A32D2D' },  // 2: hot
+  ];
+  const IN_TERMS = ['Cold', 'Warm', 'Hot'];
+  const OUT_TERMS = ['Slow', 'Medium', 'Fast'];
+
+  // ---- Input MFs ----
+  function muCold(t) { return t <= 10 ? 1 : t >= 20 ? 0 : (20-t)/10; }
+  function muWarm(t) {
+    if (t <= 15 || t >= 30) return 0;
+    return t <= 22 ? (t-15)/7 : (30-t)/8;
+  }
+  function muHot(t) { return t <= 25 ? 0 : t >= 35 ? 1 : (t-25)/10; }
+  const IN_MFS = [muCold, muWarm, muHot];
+
+  // ---- Output MFs ----
+  function muSlow(u) { return u >= 50 ? 0 : 1 - u/50; }
+  function muMedium(u) {
+    if (u <= 25 || u >= 75) return 0;
+    return u <= 50 ? (u-25)/25 : (75-u)/25;
+  }
+  function muFast(u) { return u <= 50 ? 0 : (u-50)/50; }
+  const OUT_MFS = [muSlow, muMedium, muFast];
+
+  // ---- Rules: rules[i] = output term index for input term i ----
+  let rules = [0, 1, 2];  // Cold→Slow, Warm→Medium, Hot→Fast
+
+  // ---- Inference ----
+  function infer(t) {
+    const muIn = IN_MFS.map(f => f(t));
+    const fires = [];
+    for (let i = 0; i < 3; i++) {
+      if (muIn[i] > 0) fires.push({i, w: muIn[i], out: rules[i]});
+    }
+    const aggMu = u => {
+      let m = 0;
+      for (const f of fires) {
+        const c = Math.min(OUT_MFS[f.out](u), f.w);
+        if (c > m) m = c;
+      }
+      return m;
+    };
+    let num = 0, den = 0;
+    for (let u = 0; u <= 100; u += 0.5) {
+      const a = aggMu(u);
+      num += u * a;
+      den += a;
+    }
+    return { crisp: den > 0 ? num/den : 0, aggMu, fires, muIn };
+  }
+
+  // ---- Input MF drawing ----
+  function drawInputMF(t) {
+    const W=680, H=180, p={l:40,r:16,t:22,b:32};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const xs = v => p.l + (v/40) * pw;
+    const ys = m => p.t + (1-m) * ph;
+    let s = '';
+    s += `<line x1="${p.l}" y1="${p.t+ph}" x2="${W-p.r}" y2="${p.t+ph}" stroke="var(--border-2)" stroke-width="0.5"/>`;
+    s += `<line x1="${p.l}" y1="${p.t}" x2="${p.l}" y2="${p.t+ph}" stroke="var(--border-2)" stroke-width="0.5"/>`;
+    for (let v=0; v<=40; v+=10) {
+      s += `<line x1="${xs(v)}" y1="${p.t+ph}" x2="${xs(v)}" y2="${p.t+ph+3}" stroke="var(--border-2)" stroke-width="0.5"/>`;
+      s += `<text x="${xs(v)}" y="${p.t+ph+16}" text-anchor="middle" font-size="10" fill="var(--text-2)">${v}°C</text>`;
+    }
+    [0, 0.5, 1].forEach(m => {
+      s += `<text x="${p.l-6}" y="${ys(m)+3}" text-anchor="end" font-size="10" fill="var(--text-2)">${m.toFixed(1)}</text>`;
+    });
+    IN_TERMS.forEach((name, i) => {
+      const c = COLOR[i];
+      const pts = [];
+      for (let v=0; v<=40; v+=0.5) pts.push(`${xs(v)},${ys(IN_MFS[i](v))}`);
+      s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${c.stroke}" stroke-width="1.75"/>`;
+    });
+    const cx = xs(t);
+    s += `<line x1="${cx}" y1="${p.t}" x2="${cx}" y2="${p.t+ph}" stroke="var(--text-1)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+    IN_TERMS.forEach((name, i) => {
+      const m = IN_MFS[i](t);
+      if (m > 0.01) {
+        const c = COLOR[i];
+        s += `<circle cx="${cx}" cy="${ys(m)}" r="3.5" fill="${c.stroke}" stroke="var(--surface)" stroke-width="1"/>`;
+        s += `<text x="${cx+6}" y="${ys(m)-5}" font-size="10" fill="${c.text}" font-weight="500">${name} ${m.toFixed(2)}</text>`;
+      }
+    });
+    document.getElementById('mf-in').innerHTML = s;
+  }
+
+  // ---- Output MF + aggregation drawing ----
+  function drawOutputMF(aggMu, fires, crisp) {
+    const W=680, H=180, p={l:40,r:16,t:22,b:32};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const xs = v => p.l + (v/100) * pw;
+    const ys = m => p.t + (1-m) * ph;
+    let s = '';
+    s += `<line x1="${p.l}" y1="${p.t+ph}" x2="${W-p.r}" y2="${p.t+ph}" stroke="var(--border-2)" stroke-width="0.5"/>`;
+    s += `<line x1="${p.l}" y1="${p.t}" x2="${p.l}" y2="${p.t+ph}" stroke="var(--border-2)" stroke-width="0.5"/>`;
+    for (let v=0; v<=100; v+=25) {
+      s += `<line x1="${xs(v)}" y1="${p.t+ph}" x2="${xs(v)}" y2="${p.t+ph+3}" stroke="var(--border-2)" stroke-width="0.5"/>`;
+      s += `<text x="${xs(v)}" y="${p.t+ph+16}" text-anchor="middle" font-size="10" fill="var(--text-2)">${v}%</text>`;
+    }
+    [0, 0.5, 1].forEach(m => {
+      s += `<text x="${p.l-6}" y="${ys(m)+3}" text-anchor="end" font-size="10" fill="var(--text-2)">${m.toFixed(1)}</text>`;
+    });
+    // term labels at peaks
+    [
+      {name: 'Slow', x: 0, i: 0},
+      {name: 'Medium', x: 50, i: 1},
+      {name: 'Fast', x: 100, i: 2},
+    ].forEach(({name, x, i}) => {
+      s += `<text x="${xs(x)}" y="${p.t-6}" text-anchor="middle" font-size="10" fill="${COLOR[i].text}" font-weight="500">${name}</text>`;
+    });
+    // outline of each output MF
+    OUT_TERMS.forEach((name, i) => {
+      const c = COLOR[i];
+      const pts = [];
+      for (let v=0; v<=100; v+=0.5) pts.push(`${xs(v)},${ys(OUT_MFS[i](v))}`);
+      s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${c.stroke}" stroke-width="0.75" stroke-dasharray="2,2" opacity="0.55"/>`;
+    });
+    // α-cuts (group fires by output term, take max)
+    const grouped = {};
+    fires.forEach(f => { if (!grouped[f.out] || grouped[f.out] < f.w) grouped[f.out] = f.w; });
+    Object.entries(grouped).forEach(([oi, w]) => {
+      const idx = +oi;
+      const c = COLOR[idx];
+      const pts = [`${xs(0)},${ys(0)}`];
+      for (let v=0; v<=100; v+=0.5) pts.push(`${xs(v)},${ys(Math.min(OUT_MFS[idx](v), w))}`);
+      pts.push(`${xs(100)},${ys(0)}`);
+      s += `<polygon points="${pts.join(' ')}" fill="${c.stroke}" fill-opacity="0.22" stroke="${c.stroke}" stroke-width="1"/>`;
+    });
+    // aggregated envelope + centroid
+    if (fires.length > 0) {
+      const pts = [];
+      for (let v=0; v<=100; v+=0.5) pts.push(`${xs(v)},${ys(aggMu(v))}`);
+      s += `<polyline points="${pts.join(' ')}" fill="none" stroke="var(--text-1)" stroke-width="1.5"/>`;
+      const cx = xs(crisp);
+      s += `<line x1="${cx}" y1="${p.t}" x2="${cx}" y2="${p.t+ph}" stroke="var(--text-1)" stroke-width="1.5"/>`;
+      s += `<circle cx="${cx}" cy="${p.t+ph}" r="4" fill="var(--text-1)"/>`;
+      s += `<text x="${cx}" y="${p.t+ph+24}" text-anchor="middle" font-size="11" font-weight="500" fill="var(--text-1)">${crisp.toFixed(1)}%</text>`;
+    }
+    document.getElementById('mf-out').innerHTML = s;
+  }
+
+  // ---- Rule cards ----
+  function renderRules(muIn) {
+    let h = '';
+    for (let i = 0; i < 3; i++) {
+      const inC = COLOR[i];
+      const outC = COLOR[rules[i]];
+      const w = muIn[i];
+      const active = w > 0.01;
+      h += `
+        <div class="rule-card" style="${active ? '' : 'opacity: 0.55;'}">
+          <div class="rule-row">
+            <span class="rule-kw">IF</span>
+            <span class="rule-term" style="background:${inC.bg};color:${inC.text}">${IN_TERMS[i]}</span>
+            <span class="rule-kw">→</span>
+            <button class="rule-term rule-btn" data-i="${i}" style="background:${outC.bg};color:${outC.text}">${OUT_TERMS[rules[i]]}</button>
+          </div>
+          <div class="rule-bar-wrap">
+            <div class="rule-bar"><div class="rule-bar-fill" style="width:${(w*100).toFixed(1)}%;background:${inC.stroke}"></div></div>
+            <span class="rule-mu">${w.toFixed(2)}</span>
+          </div>
+        </div>`;
+    }
+    const el = document.getElementById('rules');
+    el.innerHTML = h;
+    el.querySelectorAll('.rule-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const i = +b.dataset.i;
+        rules[i] = (rules[i] + 1) % 3;
+        transferDirty = true;
+        update();
+        scheduleTransfer();
+      });
+    });
+  }
+
+  // ---- Transfer curve ----
+  let transferData = null;
+  let transferDirty = true;
+  function computeTransfer() {
+    const N = 81;
+    const data = [];
+    for (let i=0; i<N; i++) {
+      const t = 40 * i / (N-1);
+      data.push({t, u: infer(t).crisp});
+    }
+    return data;
+  }
+
+  function drawTransfer(curT) {
+    if (transferDirty) { transferData = computeTransfer(); transferDirty = false; }
+    const W=680, H=300, p={l:48,r:16,t:18,b:36};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const xs = t => p.l + (t/40) * pw;
+    const ys = u => p.t + (1 - u/100) * ph;
+    let s = '';
+    // grid
+    [0,25,50,75,100].forEach(u => {
+      s += `<line x1="${p.l}" y1="${ys(u)}" x2="${p.l+pw}" y2="${ys(u)}" stroke="var(--border)" stroke-width="0.5"/>`;
+      s += `<text x="${p.l-6}" y="${ys(u)+3}" text-anchor="end" font-size="10" fill="var(--text-2)">${u}%</text>`;
+    });
+    [0,10,20,30,40].forEach(t => {
+      s += `<line x1="${xs(t)}" y1="${p.t}" x2="${xs(t)}" y2="${p.t+ph}" stroke="var(--border)" stroke-width="0.5"/>`;
+      s += `<text x="${xs(t)}" y="${p.t+ph+16}" text-anchor="middle" font-size="10" fill="var(--text-2)">${t}°C</text>`;
+    });
+    // border
+    s += `<rect x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="none" stroke="var(--border-2)" stroke-width="0.5"/>`;
+    // curve
+    const pts = transferData.map(d => `${xs(d.t)},${ys(d.u)}`);
+    s += `<polyline points="${pts.join(' ')}" fill="none" stroke="var(--text-1)" stroke-width="1.75"/>`;
+    // current point
+    const curU = infer(curT).crisp;
+    const mx = xs(curT), my = ys(curU);
+    s += `<line x1="${mx}" y1="${p.t+ph}" x2="${mx}" y2="${my}" stroke="var(--text-1)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+    s += `<line x1="${p.l}" y1="${my}" x2="${mx}" y2="${my}" stroke="var(--text-1)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+    s += `<circle cx="${mx}" cy="${my}" r="6" fill="none" stroke="var(--surface)" stroke-width="2.5"/>`;
+    s += `<circle cx="${mx}" cy="${my}" r="5" fill="var(--text-1)"/>`;
+    // axis labels
+    s += `<text x="${p.l+pw/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--text-2)">温度 T (°C)</text>`;
+    s += `<text x="14" y="${p.t+ph/2}" text-anchor="middle" font-size="11" fill="var(--text-2)" transform="rotate(-90 14 ${p.t+ph/2})">ファン速度 u (%)</text>`;
+    // hit area for cursor + interactivity
+    s += `<rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>`;
+    document.getElementById('transfer').innerHTML = s;
+  }
+
+  // ---- Transfer curve interactivity ----
+  function setupTransferInteraction() {
+    const svg = document.getElementById('transfer');
+    const W=680, p={l:48,r:16,t:18,b:36};
+    const pw=W-p.l-p.r;
+    const tIn = document.getElementById('t-in');
+    let dragging = false;
+    function clientToT(cx) {
+      const rect = svg.getBoundingClientRect();
+      const vbX = (cx - rect.left) * (W / rect.width);
+      if (vbX < p.l || vbX > p.l + pw) return null;
+      return Math.max(0, Math.min(40, (vbX - p.l) / pw * 40));
+    }
+    function setT(t) {
+      tIn.value = (Math.round(t / 0.5) * 0.5).toFixed(1);
+      update();
+    }
+    svg.addEventListener('pointerdown', ev => {
+      const t = clientToT(ev.clientX);
+      if (t !== null) {
+        dragging = true;
+        try { svg.setPointerCapture(ev.pointerId); } catch(e){}
+        setT(t);
+        ev.preventDefault();
+      }
+    });
+    svg.addEventListener('pointermove', ev => {
+      if (!dragging) return;
+      const t = clientToT(ev.clientX);
+      if (t !== null) setT(t);
+    });
+    svg.addEventListener('pointerup', ev => {
+      if (dragging) { dragging = false; try { svg.releasePointerCapture(ev.pointerId); } catch(e){} }
+    });
+    svg.addEventListener('pointercancel', () => { dragging = false; });
+  }
+
+  // ---- Debounced transfer redraw ----
+  let transferTimer = null;
+  function scheduleTransfer() {
+    if (transferTimer) clearTimeout(transferTimer);
+    transferTimer = setTimeout(() => {
+      drawTransfer(+document.getElementById('t-in').value);
+    }, 30);
+  }
+
+  // ---- Master update ----
+  function update() {
+    const t = +document.getElementById('t-in').value;
+    document.getElementById('t-out').textContent = t.toFixed(1);
+    const r = infer(t);
+    document.getElementById('u-out').textContent = r.crisp.toFixed(1) + '%';
+    drawInputMF(t);
+    drawOutputMF(r.aggMu, r.fires, r.crisp);
+    renderRules(r.muIn);
+    if (!transferDirty) drawTransfer(t);
+  }
+
+  document.getElementById('t-in').addEventListener('input', update);
+
+  update();
+  scheduleTransfer();
+  setupTransferInteraction();
+})();
+</script>
+</body>
+</html>

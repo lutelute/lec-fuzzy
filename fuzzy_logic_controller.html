@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuzzy Logic Controller Designer (PD-type, 5×5 Mamdani)</title>
+<style>
+  :root {
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-2: #efece4;
+    --text-1: #1a1a1a;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --border: rgba(0,0,0,0.10);
+    --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB;
+    --info-text: #0C447C;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+    /* SVG 描画で参照するエイリアス（未定義参照の修正） */
+    --text-primary: var(--text-1);
+    --text-secondary: var(--text-2);
+    --border-strong: var(--border-2);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16161480;
+      --bg: #161614;
+      --surface: #1f1f1d;
+      --surface-2: #2a2a27;
+      --text-1: #f0eee8;
+      --text-2: #b4b2a9;
+      --text-3: #888780;
+      --border: rgba(255,255,255,0.10);
+      --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C;
+      --info-text: #B5D4F4;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
+  .app { max-width: 1320px; margin: 0 auto; padding: 16px 18px 28px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 2px; margin-bottom: 12px; flex-wrap: wrap; }
+  h1 { font-size: 16px; font-weight: 500; margin: 0; letter-spacing: -0.005em; }
+  .subtitle { font-size: 11px; color: var(--text-3); margin: 0; }
+  svg { display: block; }
+
+  /* KPI strip */
+  .kpi { display: grid; grid-template-columns: 1.6fr 1.6fr 1fr 1.7fr; gap: 10px; margin-bottom: 10px; }
+  .kpi-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+  .kpi-card.accent { background: var(--info-bg); border-color: transparent; }
+  .kpi-label { font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
+  .kpi-card.accent .kpi-label { color: var(--info-text); opacity: 0.8; }
+  .kpi-row { display: flex; align-items: center; gap: 12px; margin-top: 7px; }
+  .kpi-val { font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+  .kpi-card.accent .kpi-val { font-size: 26px; color: var(--info-text); text-align: left; min-width: 0; margin-top: 4px; }
+  .preset-row { display: flex; gap: 4px; margin-top: 7px; flex-wrap: wrap; }
+
+  /* sliders */
+  input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; flex: 1; min-width: 0; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 3px; background: var(--border-2); border-radius: 2px; }
+  input[type="range"]::-moz-range-track { height: 3px; background: var(--border-2); border-radius: 2px; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; background: var(--text-1); border-radius: 50%; margin-top: -5.5px; cursor: pointer; }
+  input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; background: var(--text-1); border: none; border-radius: 50%; cursor: pointer; }
+
+  /* main grid */
+  .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+
+  /* panels */
+  .panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .panel-hdr { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
+  .panel-title { font-size: 11px; font-weight: 500; color: var(--text-1); text-transform: uppercase; letter-spacing: 0.08em; }
+  .panel-hint, .panel-stat { font-size: 10px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+  /* buttons */
+  .btn { font-size: 11px; padding: 4px 9px; background: transparent; border: 0.5px solid var(--border-2); border-radius: 6px; cursor: pointer; color: var(--text-2); font-family: inherit; transition: background 0.1s, color 0.1s; }
+  .btn:hover { background: var(--surface-2); color: var(--text-1); }
+  .btn:active { transform: scale(0.97); }
+
+  /* rule cells */
+  .cell { padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 500; border-radius: 5px; cursor: pointer; user-select: none; transition: opacity 0.15s, transform 0.08s; border: 1.5px solid transparent; }
+  .cell:hover { transform: scale(1.04); }
+  .hdr { font-size: 10px; color: var(--text-2); text-align: center; padding: 5px 4px; font-weight: 500; }
+
+  /* surface interactivity */
+  #surface { touch-action: none; }
+  #surface .hit { cursor: crosshair; }
+
+  /* lecture nav */
+  .lec-nav { display: flex; gap: 14px; margin-bottom: 10px; padding: 2px 4px; font-size: 11px; flex-wrap: wrap; align-items: center; }
+  .lec-nav a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color 0.1s, border-color 0.1s; }
+  .lec-nav a:hover { color: var(--text-1); border-bottom-color: var(--border-2); }
+  .lec-nav a.home { color: var(--text-2); font-weight: 500; }
+  .lec-nav .sep { color: var(--text-3); opacity: 0.5; }
+
+  /* footer */
+  .footer { font-size: 10px; color: var(--text-3); text-align: center; margin-top: 14px; line-height: 1.7; }
+
+  /* responsive */
+  @media (max-width: 980px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .kpi { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .kpi { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="lec-nav">
+    <a class="home" href="index.html">← 教材トップ</a>
+    <span class="sep">·</span>
+    <a href="lecture-notes.html">講義ノート</a>
+    <a href="fuzzy_temperature_controller.html">温度制御デモ</a>
+    <span class="sep">·</span>
+    <span style="color:var(--text-3)">Step 2 / 2 — PD型・2入力</span>
+  </nav>
+
+  <header>
+    <h1>Fuzzy Logic Controller Designer</h1>
+    <p class="subtitle">PD-type · 5×5 Mamdani · triangular MF / max-min / centroid</p>
+  </header>
+
+  <section class="kpi">
+    <div class="kpi-card">
+      <div class="kpi-label">誤差 e</div>
+      <div class="kpi-row">
+        <input type="range" min="-1" max="1" step="0.02" value="0.4" id="e-in"/>
+        <div class="kpi-val" id="e-out">+0.40</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">誤差微分 ė</div>
+      <div class="kpi-row">
+        <input type="range" min="-1" max="1" step="0.02" value="-0.3" id="de-in"/>
+        <div class="kpi-val" id="de-out">-0.30</div>
+      </div>
+    </div>
+    <div class="kpi-card accent">
+      <div class="kpi-label">確定出力 u</div>
+      <div class="kpi-val" id="u-out">+0.000</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">プリセット</div>
+      <div class="preset-row">
+        <button class="btn" id="preset-pd">標準PD</button>
+        <button class="btn" id="preset-aggr">アグレッシブ</button>
+        <button class="btn" id="preset-soft">ソフト</button>
+        <button class="btn" id="preset-zero">クリア</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="main-grid">
+    <div class="col">
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">制御曲面 u(e, ė)</div>
+          <div class="panel-hint">クリック / ドラッグで動作点を移動</div>
+        </div>
+        <svg id="surface" viewBox="0 0 680 340" style="width: 100%;" role="img"></svg>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">Mamdani 合成 → 重心デファジィ化</div>
+          <div class="panel-hint">網掛 = αカット / 太線 = 合成集合 / 縦線 = 重心</div>
+        </div>
+        <svg id="mf-out" viewBox="0 0 680 170" style="width: 100%;" role="img"></svg>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">ルール表 5 × 5</div>
+          <div class="panel-stat" id="rule-stat">発火 0 / 25</div>
+        </div>
+        <div id="rule-table" style="display: grid; grid-template-columns: 50px repeat(5, 1fr); gap: 3px;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">入力 MF — e</div>
+        </div>
+        <svg id="mf-e" viewBox="0 0 330 140" style="width: 100%;" role="img"></svg>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">入力 MF — ė</div>
+        </div>
+        <svg id="mf-de" viewBox="0 0 330 140" style="width: 100%;" role="img"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Mamdani inference · triangular MF (centers: NB=-1, NS=-0.5, ZE=0, PS=+0.5, PB=+1, width=0.5)<br>
+    aggregation: max-of-min · defuzzification: centroid (numerical integration, du=0.02)
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const TERMS = ['NB','NS','ZE','PS','PB'];
+  const CENTERS = [-1, -0.5, 0, 0.5, 1];
+  const WIDTH = 0.5;
+  const TC = {
+    NB: { bg: '#F09595', text: '#501313', stroke: '#A32D2D' },
+    NS: { bg: '#FCEBEB', text: '#791F1F', stroke: '#E24B4A' },
+    ZE: { bg: '#F1EFE8', text: '#2C2C2A', stroke: '#5F5E5A' },
+    PS: { bg: '#E6F1FB', text: '#042C53', stroke: '#378ADD' },
+    PB: { bg: '#85B7EB', text: '#042C53', stroke: '#0C447C' },
+  };
+  function mu(idx, x) { return Math.max(0, 1 - Math.abs(x - CENTERS[idx]) / WIDTH); }
+
+  const PRESETS = {
+    pd:   [[0,0,0,1,2],[0,0,1,2,3],[0,1,2,3,4],[1,2,3,4,4],[2,3,4,4,4]],
+    aggr: [[0,0,0,0,2],[0,0,0,2,4],[0,0,2,4,4],[0,2,4,4,4],[2,4,4,4,4]],
+    soft: [[1,1,1,2,2],[1,1,2,2,3],[1,2,2,2,3],[1,2,2,3,3],[2,2,3,3,3]],
+    zero: [[2,2,2,2,2],[2,2,2,2,2],[2,2,2,2,2],[2,2,2,2,2],[2,2,2,2,2]],
+  };
+  let rules = PRESETS.pd.map(r => r.slice());
+
+  function infer(e, de) {
+    const mE = TERMS.map((_,i) => mu(i, e));
+    const mD = TERMS.map((_,j) => mu(j, de));
+    const fires = [];
+    for (let i=0;i<5;i++) for (let j=0;j<5;j++) {
+      const w = Math.min(mE[i], mD[j]);
+      if (w > 0) fires.push({i,j,w,out:rules[i][j]});
+    }
+    const aggMu = u => {
+      let m = 0;
+      for (const f of fires) {
+        const c = Math.min(mu(f.out, u), f.w);
+        if (c > m) m = c;
+      }
+      return m;
+    };
+    let num=0, den=0;
+    for (let u=-1; u<=1.0001; u+=0.02) { const a = aggMu(u); num += u*a; den += a; }
+    return { crisp: den>0 ? num/den : 0, aggMu, fires };
+  }
+
+  function drawInputMF(svgId, x, label) {
+    const W=330, H=140, p={l:28,r:12,t:18,b:26};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const xs = v => p.l + ((v+1)/2)*pw;
+    const ys = m => p.t + (1-m)*ph;
+    let s = '';
+    s += `<line x1="${p.l}" y1="${p.t+ph}" x2="${W-p.r}" y2="${p.t+ph}" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+    s += `<line x1="${p.l}" y1="${p.t}" x2="${p.l}" y2="${p.t+ph}" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+    [-1,-0.5,0,0.5,1].forEach(v => {
+      s += `<text x="${xs(v)}" y="${p.t+ph+14}" text-anchor="middle" font-size="10" fill="var(--text-secondary)">${v}</text>`;
+    });
+    s += `<text x="${W/2}" y="${H-2}" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="500">${label}</text>`;
+    TERMS.forEach((t,i) => {
+      const c = TC[t];
+      const pts = [];
+      for (let v=-1; v<=1.0001; v+=0.04) pts.push(`${xs(v)},${ys(mu(i,v))}`);
+      s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${c.stroke}" stroke-width="1.5"/>`;
+      s += `<text x="${xs(CENTERS[i])}" y="${p.t-4}" text-anchor="middle" font-size="9" fill="${c.text}" font-weight="500">${t}</text>`;
+    });
+    const cx = xs(x);
+    s += `<line x1="${cx}" y1="${p.t}" x2="${cx}" y2="${p.t+ph}" stroke="var(--text-primary)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+    TERMS.forEach((t,i) => {
+      const m = mu(i,x);
+      if (m > 0.01) {
+        s += `<circle cx="${cx}" cy="${ys(m)}" r="3" fill="${TC[t].stroke}" stroke="var(--surface)" stroke-width="1"/>`;
+        s += `<text x="${cx+5}" y="${ys(m)-4}" font-size="9" fill="${TC[t].text}" font-weight="500">${m.toFixed(2)}</text>`;
+      }
+    });
+    document.getElementById(svgId).innerHTML = s;
+  }
+
+  function renderRuleTable(fires) {
+    const el = document.getElementById('rule-table');
+    let h = '<div></div>';
+    TERMS.forEach(t => { h += `<div class="hdr">ė=${t}</div>`; });
+    for (let i=0;i<5;i++) {
+      h += `<div class="hdr" style="display:flex; align-items:center; justify-content:flex-end; padding-right:8px;">e=${TERMS[i]}</div>`;
+      for (let j=0;j<5;j++) {
+        const t = TERMS[rules[i][j]];
+        const c = TC[t];
+        const f = fires.find(x => x.i===i && x.j===j);
+        const op = f ? 1 : 0.45;
+        const br = f ? `border-color: var(--text-primary);` : '';
+        h += `<div class="cell" data-i="${i}" data-j="${j}" style="background:${c.bg}; color:${c.text}; opacity:${op}; ${br}">${t}</div>`;
+      }
+    }
+    el.innerHTML = h;
+    const stat = document.getElementById('rule-stat');
+    if (stat) stat.textContent = `発火 ${fires.length} / 25`;
+    el.querySelectorAll('.cell').forEach(c => {
+      c.addEventListener('click', () => {
+        const i = +c.dataset.i, j = +c.dataset.j;
+        rules[i][j] = (rules[i][j] + 1) % 5;
+        surfaceDirty = true;
+        update();
+        scheduleSurface();
+      });
+    });
+  }
+
+  function drawOutputMF(aggMu, fires, crisp) {
+    const W=680, H=170, p={l:36,r:16,t:20,b:28};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const xs = v => p.l + ((v+1)/2)*pw;
+    const ys = m => p.t + (1-m)*ph;
+    let s = '';
+    s += `<line x1="${p.l}" y1="${p.t+ph}" x2="${W-p.r}" y2="${p.t+ph}" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+    s += `<line x1="${p.l}" y1="${p.t}" x2="${p.l}" y2="${p.t+ph}" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+    [-1,-0.5,0,0.5,1].forEach(v => {
+      s += `<text x="${xs(v)}" y="${p.t+ph+16}" text-anchor="middle" font-size="11" fill="var(--text-secondary)">${v}</text>`;
+    });
+    [0,0.5,1].forEach(m => {
+      s += `<text x="${p.l-6}" y="${ys(m)+4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${m.toFixed(1)}</text>`;
+    });
+    TERMS.forEach((t,i) => {
+      const c = TC[t];
+      const pts = [];
+      for (let v=-1; v<=1.0001; v+=0.02) pts.push(`${xs(v)},${ys(mu(i,v))}`);
+      s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${c.stroke}" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.55"/>`;
+      s += `<text x="${xs(CENTERS[i])}" y="${p.t-4}" text-anchor="middle" font-size="10" fill="${c.text}" font-weight="500">${t}</text>`;
+    });
+    const grouped = {};
+    fires.forEach(f => { if (!grouped[f.out] || grouped[f.out] < f.w) grouped[f.out] = f.w; });
+    Object.entries(grouped).forEach(([oi, w]) => {
+      const idx = +oi;
+      const c = TC[TERMS[idx]];
+      const pts = [`${xs(-1)},${ys(0)}`];
+      for (let v=-1; v<=1.0001; v+=0.02) pts.push(`${xs(v)},${ys(Math.min(mu(idx,v), w))}`);
+      pts.push(`${xs(1)},${ys(0)}`);
+      s += `<polygon points="${pts.join(' ')}" fill="${c.stroke}" fill-opacity="0.2" stroke="${c.stroke}" stroke-width="0.75"/>`;
+    });
+    const env = [];
+    let any = false;
+    for (let v=-1; v<=1.0001; v+=0.01) { const m = aggMu(v); if (m>0) any=true; env.push(`${xs(v)},${ys(m)}`); }
+    if (any) {
+      s += `<polyline points="${env.join(' ')}" fill="none" stroke="var(--text-primary)" stroke-width="1.5"/>`;
+      const cx = xs(crisp);
+      s += `<line x1="${cx}" y1="${p.t}" x2="${cx}" y2="${p.t+ph}" stroke="var(--text-primary)" stroke-width="1.5"/>`;
+      s += `<circle cx="${cx}" cy="${p.t+ph}" r="4" fill="var(--text-primary)"/>`;
+      const lbl = (crisp >= 0 ? '+' : '') + crisp.toFixed(3);
+      s += `<text x="${cx}" y="${p.t-6}" text-anchor="middle" font-size="11" font-weight="500" fill="var(--text-primary)">u=${lbl}</text>`;
+    }
+    document.getElementById('mf-out').innerHTML = s;
+  }
+
+  function uColor(u) {
+    const c0=[226,75,74], cm=[241,239,232], c1=[55,138,221];
+    let r,g,b;
+    if (u <= 0) { const t = u+1; r=c0[0]+(cm[0]-c0[0])*t; g=c0[1]+(cm[1]-c0[1])*t; b=c0[2]+(cm[2]-c0[2])*t; }
+    else { const t = u; r=cm[0]+(c1[0]-cm[0])*t; g=cm[1]+(c1[1]-cm[1])*t; b=cm[2]+(c1[2]-cm[2])*t; }
+    return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+  }
+
+  let surface = null, surfaceDirty = true;
+  function computeSurface() {
+    const N = 25;
+    const g = [];
+    for (let i=0;i<N;i++) {
+      const row = [];
+      const e = -1 + 2*i/(N-1);
+      for (let j=0;j<N;j++) {
+        const de = -1 + 2*j/(N-1);
+        row.push(infer(e, de).crisp);
+      }
+      g.push(row);
+    }
+    return g;
+  }
+
+  function drawSurface(curE, curDE) {
+    if (surfaceDirty) { surface = computeSurface(); surfaceDirty = false; }
+    const W=680, H=340, p={l:40,r:90,t:16,b:34};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const N = surface.length;
+    const cw = pw/(N-1), ch = ph/(N-1);
+    let s = '';
+    for (let i=0;i<N;i++) {
+      for (let j=0;j<N;j++) {
+        const e_i = -1 + 2*i/(N-1);
+        const de_j = -1 + 2*j/(N-1);
+        let x = p.l + ((e_i+1)/2)*pw - cw/2;
+        let y = p.t + (1 - (de_j+1)/2)*ph - ch/2;
+        let w = cw, hh = ch;
+        if (x < p.l) { w -= (p.l - x); x = p.l; }
+        if (y < p.t) { hh -= (p.t - y); y = p.t; }
+        if (x + w > p.l + pw) w = p.l + pw - x;
+        if (y + hh > p.t + ph) hh = p.t + ph - y;
+        s += `<rect x="${x}" y="${y}" width="${w + 0.4}" height="${hh + 0.4}" fill="${uColor(surface[i][j])}"/>`;
+      }
+    }
+    s += `<rect x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="none" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+    [-1,-0.5,0,0.5,1].forEach(v => {
+      const x = p.l + ((v+1)/2)*pw;
+      s += `<line x1="${x}" y1="${p.t+ph}" x2="${x}" y2="${p.t+ph+4}" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+      s += `<text x="${x}" y="${p.t+ph+16}" text-anchor="middle" font-size="10" fill="var(--text-secondary)">${v}</text>`;
+      const y = p.t + ph - ((v+1)/2)*ph;
+      s += `<line x1="${p.l-4}" y1="${y}" x2="${p.l}" y2="${y}" stroke="var(--border-strong)" stroke-width="0.5"/>`;
+      s += `<text x="${p.l-6}" y="${y+3}" text-anchor="end" font-size="10" fill="var(--text-secondary)">${v}</text>`;
+    });
+    s += `<text x="${p.l+pw/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--text-secondary)">e (誤差)</text>`;
+    s += `<text x="14" y="${p.t+ph/2}" text-anchor="middle" font-size="11" fill="var(--text-secondary)" transform="rotate(-90 14 ${p.t+ph/2})">ė (誤差微分)</text>`;
+    const mx = p.l + ((curE+1)/2)*pw;
+    const my = p.t + ph - ((curDE+1)/2)*ph;
+    s += `<circle cx="${mx}" cy="${my}" r="7" fill="none" stroke="var(--surface)" stroke-width="2.5"/>`;
+    s += `<circle cx="${mx}" cy="${my}" r="7" fill="none" stroke="var(--text-primary)" stroke-width="1.5"/>`;
+    s += `<circle cx="${mx}" cy="${my}" r="2.5" fill="var(--text-primary)"/>`;
+    const lx = W - p.r + 28, lyT = p.t, lyB = p.t + ph;
+    const lw = 18, lh = lyB - lyT, steps = 50;
+    for (let k=0;k<steps;k++) {
+      const u = 1 - 2*k/(steps-1);
+      s += `<rect x="${lx}" y="${lyT + k*lh/steps}" width="${lw}" height="${lh/steps + 0.5}" fill="${uColor(u)}"/>`;
+    }
+    s += `<rect x="${lx}" y="${lyT}" width="${lw}" height="${lh}" fill="none" stroke="var(--border)" stroke-width="0.5"/>`;
+    [1,0.5,0,-0.5,-1].forEach(v => {
+      const y = lyT + (1-(v+1)/2)*lh;
+      s += `<text x="${lx + lw + 4}" y="${y+3}" font-size="10" fill="var(--text-secondary)">${v>=0?'+':''}${v}</text>`;
+    });
+    s += `<text x="${lx + lw/2}" y="${lyT - 6}" text-anchor="middle" font-size="10" fill="var(--text-secondary)" font-weight="500">u</text>`;
+    // hit area for cursor styling (last so it sits on top, transparent fill)
+    s += `<rect class="hit" x="${p.l}" y="${p.t}" width="${pw}" height="${ph}" fill="transparent"/>`;
+    document.getElementById('surface').innerHTML = s;
+  }
+
+  let surfTimer = null;
+  function scheduleSurface() {
+    if (surfTimer) clearTimeout(surfTimer);
+    surfTimer = setTimeout(() => {
+      const e = +document.getElementById('e-in').value;
+      const de = +document.getElementById('de-in').value;
+      drawSurface(e, de);
+    }, 30);
+  }
+
+  function update() {
+    const e = +document.getElementById('e-in').value;
+    const de = +document.getElementById('de-in').value;
+    document.getElementById('e-out').textContent = (e>=0?'+':'') + e.toFixed(2);
+    document.getElementById('de-out').textContent = (de>=0?'+':'') + de.toFixed(2);
+    const r = infer(e, de);
+    document.getElementById('u-out').textContent = (r.crisp>=0?'+':'') + r.crisp.toFixed(3);
+    drawInputMF('mf-e', e, 'e (誤差)');
+    drawInputMF('mf-de', de, 'ė (誤差微分)');
+    renderRuleTable(r.fires);
+    drawOutputMF(r.aggMu, r.fires, r.crisp);
+    if (!surfaceDirty) drawSurface(e, de);
+  }
+
+  // ---- Surface interaction: click/drag to move operating point ----
+  function setupSurfaceInteraction() {
+    const svg = document.getElementById('surface');
+    const W=680, H=340, p={l:40,r:90,t:16,b:34};
+    const pw=W-p.l-p.r, ph=H-p.t-p.b;
+    const eIn = document.getElementById('e-in');
+    const deIn = document.getElementById('de-in');
+    let dragging = false;
+
+    function clientToOp(cx, cy) {
+      const rect = svg.getBoundingClientRect();
+      const vbX = (cx - rect.left) * (W / rect.width);
+      const vbY = (cy - rect.top) * (H / rect.height);
+      if (vbX < p.l || vbX > p.l + pw || vbY < p.t || vbY > p.t + ph) return null;
+      const e = -1 + 2 * (vbX - p.l) / pw;
+      const de = 1 - 2 * (vbY - p.t) / ph;
+      return { e: Math.max(-1, Math.min(1, e)), de: Math.max(-1, Math.min(1, de)) };
+    }
+    function setOp(pt) {
+      const step = 0.02;
+      eIn.value = (Math.round(pt.e / step) * step).toFixed(2);
+      deIn.value = (Math.round(pt.de / step) * step).toFixed(2);
+      update();
+    }
+    svg.addEventListener('pointerdown', (ev) => {
+      const pt = clientToOp(ev.clientX, ev.clientY);
+      if (pt) {
+        dragging = true;
+        try { svg.setPointerCapture(ev.pointerId); } catch (e) {}
+        setOp(pt);
+        ev.preventDefault();
+      }
+    });
+    svg.addEventListener('pointermove', (ev) => {
+      if (dragging) {
+        const pt = clientToOp(ev.clientX, ev.clientY);
+        if (pt) setOp(pt);
+      }
+    });
+    svg.addEventListener('pointerup', (ev) => {
+      if (dragging) {
+        dragging = false;
+        try { svg.releasePointerCapture(ev.pointerId); } catch (e) {}
+      }
+    });
+    svg.addEventListener('pointercancel', () => { dragging = false; });
+  }
+
+  document.getElementById('e-in').addEventListener('input', update);
+  document.getElementById('de-in').addEventListener('input', update);
+  ['pd','aggr','soft','zero'].forEach(name => {
+    document.getElementById('preset-' + name).addEventListener('click', () => {
+      rules = PRESETS[name].map(r => r.slice());
+      surfaceDirty = true;
+      update();
+      scheduleSurface();
+    });
+  });
+
+  update();
+  scheduleSurface();
+  setupSurfaceInteraction();
+})();
+</script>
+</body>
+</html>

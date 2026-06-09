@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>教員用ガイド & 模範解答 — ファジィ制御教材</title>
+<style>
+  :root {
+    --bg: #f6f4ee; --surface: #ffffff; --surface-2: #efece4;
+    --text-1: #1a1a1a; --text-2: #5f5e5a; --text-3: #888780;
+    --border: rgba(0,0,0,0.10); --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB; --info-text: #0C447C;
+    --blue: #378ADD; --blue-deep: #0C447C;
+    --amber-bg: #FAEEDA; --amber-text: #854F0B; --red: #E24B4A;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --surface: #1f1f1d; --surface-2: #2a2a27;
+      --text-1: #f0eee8; --text-2: #b4b2a9; --text-3: #888780;
+      --border: rgba(255,255,255,0.10); --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C; --info-text: #B5D4F4;
+      --blue: #5BA0E8; --blue-deep: #B5D4F4;
+      --amber-bg: #3a2f1c; --amber-text: #E8C88A;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 15px; line-height: 1.75; }
+  .app { max-width: 1080px; margin: 0 auto; padding: 18px 20px 60px; }
+  .lec-nav { display: flex; gap: 14px; margin-bottom: 16px; padding: 2px 4px; font-size: 12px; flex-wrap: wrap; align-items: center; }
+  .lec-nav a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color 0.1s, border-color 0.1s; }
+  .lec-nav a:hover { color: var(--text-1); border-bottom-color: var(--border-2); }
+  .lec-nav a.home { color: var(--text-2); font-weight: 500; }
+  .lec-nav .sep { color: var(--text-3); opacity: 0.5; }
+  .doc { max-width: 820px; margin: 0 auto; }
+
+  .title-block { border-bottom: 0.5px solid var(--border-2); padding-bottom: 18px; margin-bottom: 8px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); font-weight: 500; margin: 0 0 6px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .title-block p { color: var(--text-2); margin: 4px 0 0; font-size: 14.5px; }
+
+  h2.sec { font-size: 19px; font-weight: 600; margin: 38px 0 6px; padding-top: 14px; border-top: 0.5px solid var(--border); }
+  h2.sec .num { color: var(--blue); margin-right: 8px; }
+  h3 { font-size: 15.5px; font-weight: 600; margin: 22px 0 4px; }
+  p { margin: 10px 0; }
+  strong { font-weight: 600; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+  math { font-size: 1.05em; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin-bottom: 3px; }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 16px 0; }
+  .tbl th, .tbl td { border: 0.5px solid var(--border); padding: 7px 11px; text-align: left; vertical-align: top; }
+  .tbl thead th { background: var(--surface-2); font-weight: 600; }
+  .tbl td.t { white-space: nowrap; color: var(--text-2); font-variant-numeric: tabular-nums; width: 84px; }
+  .tbl td.phase { font-weight: 600; white-space: nowrap; }
+
+  .callout { border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; font-size: 13.5px; line-height: 1.65; }
+  .ask { background: var(--info-bg); border-left: 3px solid var(--blue); color: var(--info-text); }
+  .tip { background: var(--amber-bg); border-left: 3px solid var(--amber-text); color: var(--amber-text); }
+  .callout .c-h { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.9; margin-bottom: 4px; }
+
+  .answer { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 14px 18px; margin: 18px 0; }
+  .answer .a-h { font-size: 12px; font-weight: 700; color: var(--blue-deep); margin-bottom: 4px; }
+  .answer .a-h .badge { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: middle; background: var(--info-bg); color: var(--info-text); }
+  .answer .final { background: var(--surface-2); border-radius: 6px; padding: 6px 12px; margin: 8px 0 2px; font-weight: 600; }
+  .answer .demo-val { font-size: 12.5px; color: var(--text-2); }
+  .eq { margin: 12px 0 12px 6px; padding-left: 14px; border-left: 2px solid var(--border); overflow-x: auto; }
+
+  .footer { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 44px; padding-top: 18px; border-top: 0.5px solid var(--border); line-height: 1.8; }
+  .footer a { color: var(--blue-deep); }
+  @media (max-width: 720px) { body { font-size: 14.5px; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="lec-nav">
+    <a class="home" href="index.html">← 教材トップ</a>
+    <span class="sep">·</span>
+    <a href="lecture-notes.html">講義ノート</a>
+    <a href="how-to-use.html">操作ガイド</a>
+    <a href="fuzzy_temperature_controller.html">温度デモ</a>
+    <a href="fuzzy_logic_controller.html">PDデモ</a>
+  </nav>
+
+  <div class="doc">
+    <div class="title-block">
+      <p class="eyebrow">教員用 · 指導の手引き</p>
+      <h1>教員用ガイド & 模範解答</h1>
+      <p>授業展開・時間配分・各デモの見せ方・つまずき対処・演習7問の完全解答（デモ実測値つき）</p>
+    </div>
+
+    <p>
+      本ガイドは、制御工学（古典制御 PID まで履修済み）の発展トピックとしてファジィ制御を 1〜2 コマで扱う教員向けの手引きです。
+      演習の模範解答には、デモの推論ロジックを再現して算出した<strong>正確な出力値</strong>を併記しています。学生配布用ではないため、解答を見せたくない場合は本ファイルを共有しないでください。
+    </p>
+
+    <!-- A 授業展開 -->
+    <h2 class="sec" id="a"><span class="num">A.</span>授業展開と時間配分</h2>
+    <h3>標準：2 コマ（各 90 分）</h3>
+    <table class="tbl">
+      <thead><tr><th>時間</th><th>内容</th><th>使う教材</th></tr></thead>
+      <tbody>
+        <tr><td class="t">1限 0–15</td><td class="phase">導入</td><td>モデルベース制御の限界 → 知識ベース制御の発想（講義ノート §1）</td></tr>
+        <tr><td class="t">1限 15–40</td><td class="phase">体験 Step 1</td><td>温度デモで「ファジィ化→推論→デファジィ化」を全員で操作</td></tr>
+        <tr><td class="t">1限 40–80</td><td class="phase">理論前半</td><td>MF・ファジィ化・ルール・Mamdani 合成（§2–5）</td></tr>
+        <tr><td class="t">1限 80–90</td><td class="phase">小演習</td><td>演習 問1–問2（温度デモで答え合わせ）</td></tr>
+        <tr><td class="t">2限 0–10</td><td class="phase">復習</td><td>重心デファジィ化の復習（§6 前半）</td></tr>
+        <tr><td class="t">2限 10–45</td><td class="phase">体験 Step 2 + 接続</td><td>PD デモで制御曲面 → PD 制御則との対応（§6 後半）★山場</td></tr>
+        <tr><td class="t">2限 45–65</td><td class="phase">応用</td><td>応用ショーケースで実用例・最新動向を概観</td></tr>
+        <tr><td class="t">2限 65–90</td><td class="phase">演習</td><td>演習 問3–問7、まとめ</td></tr>
+      </tbody>
+    </table>
+
+    <h3>短縮：1 コマ（90 分）</h3>
+    <p>導入(10) → 温度デモ体験(15) → 理論ダイジェスト §2–6(25) → PD デモと PD 接続(20) → 基礎演習 問1・問3(15) → まとめ・応用紹介(5)。応用ショーケースと応用演習は宿題に回す。</p>
+
+    <!-- B 見せ方 -->
+    <h2 class="sec" id="b"><span class="num">B.</span>各デモの見せ方（操作と発問）</h2>
+    <h3>温度デモ（Step 1）</h3>
+    <ul>
+      <li>スライダーを <strong>10→40°C</strong> へゆっくり動かし、入力 MF パネルで「複数の集合に同時に属する」様子を見せる。</li>
+      <li>出力パネルの<strong>網掛け（αカット）</strong>が発火強度で高さを変えること、太線（合成集合）の重心が確定出力になることを指さしで確認。</li>
+    </ul>
+    <div class="callout ask"><div class="c-h">発問例</div>「18°C は Cold ですか Warm ですか？」→ どちらも部分的に正しい、が狙いの答え。μの総和が 1 でないことに気づかせる。</div>
+
+    <h3>PD デモ（Step 2）</h3>
+    <ul>
+      <li>まず<strong>制御曲面</strong>をクリック／ドラッグして動作点を動かし、出力 u が滑らかに変わることを見せる。</li>
+      <li>プリセット「標準PD→アグレッシブ→ソフト」を切り替え、<strong>原点付近の傾き</strong>（＝ゲイン）と<strong>不感帯</strong>の違いを比較。</li>
+      <li>ルール表のセルをクリックして 1 つだけ書き換え、曲面が局所的に歪むのを見せる（ルール＝曲面の点彫刻）。</li>
+    </ul>
+    <div class="callout ask"><div class="c-h">発問例</div>「この曲面の原点まわりを定規で近似したら、式はどうなる？」→ <math><mrow><mi>u</mi><mo>≈</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math> に着地させ、PID の章とつなぐ。</div>
+
+    <!-- C つまずき -->
+    <h2 class="sec" id="c"><span class="num">C.</span>よくあるつまずきと対処</h2>
+    <table class="tbl">
+      <thead><tr><th>つまずき</th><th>対処</th></tr></thead>
+      <tbody>
+        <tr><td>μを確率と混同（総和を 1 にしようとする）</td><td>「Cold 0.2 かつ Warm 0.43」は矛盾でない。確率でなく<em>帰属度</em>だと強調（§2 サイドノート）。</td></tr>
+        <tr><td>min/max が天下り</td><td>min=AND（両方成り立つ弱い方）、max=OR（重ねる）。ブール論理の両端 0/1 で一致を見せる。</td></tr>
+        <tr><td>重心がなぜ出力か</td><td>合成集合を「賛成度の分布」と読み、その<em>加重平均の位置</em>が落とし所、と説明。</td></tr>
+        <tr><td>制御曲面と PD が結びつかない</td><td>原点付近を平面近似 → 傾き＝ゲイン、を数値で（§6・問4）。</td></tr>
+      </tbody>
+    </table>
+
+    <!-- D 模範解答 -->
+    <h2 class="sec" id="d"><span class="num">D.</span>演習 模範解答</h2>
+    <p>※「デモ実測」は各 HTML の推論ロジック（重心デファジィ化、温度デモ <math><mrow><mi>Δ</mi><mi>u</mi><mo>=</mo><mn>0.5</mn></mrow></math>／PD デモ <math><mn>0.02</mn></math>）で算出した値。</p>
+
+    <div class="answer">
+      <div class="a-h">問 1 <span class="badge">基礎</span></div>
+      <p><math><mrow><mi>T</mi><mo>=</mo><mn>27</mn></mrow></math>°C を各入力 MF に代入：</p>
+      <div class="eq"><math display="block">
+        <mtable columnalign="left">
+          <mtr><mtd><msub><mi>μ</mi><mtext>Cold</mtext></msub><mo>(</mo><mn>27</mn><mo>)</mo></mtd><mtd><mo>=</mo><mn>0</mn></mtd><mtd><mo>(</mo><mn>27</mn><mo>≥</mo><mn>20</mn><mo>)</mo></mtd></mtr>
+          <mtr><mtd><msub><mi>μ</mi><mtext>Warm</mtext></msub><mo>(</mo><mn>27</mn><mo>)</mo></mtd><mtd><mo>=</mo><mfrac><mrow><mn>30</mn><mo>−</mo><mn>27</mn></mrow><mn>8</mn></mfrac><mo>=</mo><mn>0.375</mn></mtd></mtr>
+          <mtr><mtd><msub><mi>μ</mi><mtext>Hot</mtext></msub><mo>(</mo><mn>27</mn><mo>)</mo></mtd><mtd><mo>=</mo><mfrac><mrow><mn>27</mn><mo>−</mo><mn>25</mn></mrow><mn>10</mn></mfrac><mo>=</mo><mn>0.200</mn></mtd></mtr>
+        </mtable>
+      </math></div>
+      <div class="final">Cold = 0,　Warm = 0.375,　Hot = 0.200</div>
+    </div>
+
+    <div class="answer">
+      <div class="a-h">問 2 <span class="badge">基礎</span></div>
+      <p>発火するルール（前件部 = 入力 μ、後件部 = 標準ルール）：</p>
+      <ul>
+        <li>R2: Warm → Medium、発火強度 <math><mrow><msub><mi>w</mi><mn>2</mn></msub><mo>=</mo><mn>0.375</mn></mrow></math></li>
+        <li>R3: Hot → Fast、発火強度 <math><mrow><msub><mi>w</mi><mn>3</mn></msub><mo>=</mo><mn>0.200</mn></mrow></math></li>
+        <li>R1: Cold → Slow、<math><mrow><msub><mi>w</mi><mn>1</mn></msub><mo>=</mo><mn>0</mn></mrow></math>（発火せず）</li>
+      </ul>
+      <p>合成：Medium の MF を高さ 0.375、Fast の MF を高さ 0.200 で α カットし、max で重ねる。重心は重み・面積とも優勢な <strong>Medium が支配的</strong>で、Fast の裾が高 u 側へわずかに引く。</p>
+      <div class="final">デモ実測：u* ≈ 59.7%</div>
+      <p class="demo-val">指導ポイント：Medium 単独なら 50%。Fast(20%) が +約10% 押し上げている、と分解して見せると重心の意味が伝わる。</p>
+    </div>
+
+    <div class="answer">
+      <div class="a-h">問 3 <span class="badge">基礎</span></div>
+      <p>半幅 <math><mrow><mi>d</mi><mo>=</mo><mn>0.5</mn></mrow></math> の三角形で各入力をファジィ化：</p>
+      <div class="eq"><math display="block">
+        <mtable columnalign="left">
+          <mtr><mtd><mi>e</mi><mo>=</mo><mn>0.4</mn><mo>:</mo></mtd><mtd><msub><mi>μ</mi><mtext>ZE</mtext></msub><mo>=</mo><mn>0.2</mn><mo>,</mo></mtd><mtd><msub><mi>μ</mi><mtext>PS</mtext></msub><mo>=</mo><mn>0.8</mn></mtd></mtr>
+          <mtr><mtd><mover><mi>e</mi><mo>˙</mo></mover><mo>=</mo><mo>−</mo><mn>0.3</mn><mo>:</mo></mtd><mtd><msub><mi>μ</mi><mtext>NS</mtext></msub><mo>=</mo><mn>0.6</mn><mo>,</mo></mtd><mtd><msub><mi>μ</mi><mtext>ZE</mtext></msub><mo>=</mo><mn>0.4</mn></mtd></mtr>
+        </mtable>
+      </math></div>
+      <p>発火は <math><mrow><mn>2</mn><mo>×</mo><mn>2</mn><mo>=</mo><mn>4</mn></mrow></math> 本（前件部 min）：</p>
+      <table class="tbl">
+        <thead><tr><th>e</th><th>ė</th><th>w = min</th><th>後件部</th></tr></thead>
+        <tbody>
+          <tr><td>ZE</td><td>NS</td><td>0.2</td><td>NS</td></tr>
+          <tr><td>ZE</td><td>ZE</td><td>0.2</td><td>ZE</td></tr>
+          <tr><td>PS</td><td>NS</td><td>0.6</td><td>ZE</td></tr>
+          <tr><td>PS</td><td>ZE</td><td>0.4</td><td>PS</td></tr>
+        </tbody>
+      </table>
+      <div class="final">発火 4 本／デモ実測：u* ≈ +0.083</div>
+      <p class="demo-val">最大重み 0.6 が ZE のため出力はほぼ中立、PS(0.4) がわずかに正へ寄せる。</p>
+    </div>
+
+    <div class="answer">
+      <div class="a-h">問 4 <span class="badge">応用</span></div>
+      <p><strong>原点付近が平面：</strong>原点では隣接する MF が線形に重なり（三角形の斜辺）、発火する複数ルールの後件部中心が <math><mi>e</mi></math>, <math><mover><mi>e</mi><mo>˙</mo></mover></math> に比例して配置されるため、重心が両者の線形結合 <math><mrow><mo>≈</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math> になる。</p>
+      <p><strong>端で飽和：</strong>MF は有限幅なので、<math><mrow><mo>|</mo><mi>e</mi><mo>|</mo></mrow></math>, <math><mrow><mo>|</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>|</mo></mrow></math> が大きいと端の NB/PB のみが μ=1 で発火し続け、ルール表の角が同一出力（NB or PB）に張り付くため u が ±1 で頭打ちになる。</p>
+      <p><strong>役割：</strong>これは<em>アクチュエータ飽和を内蔵した制御則</em>。過大入力を自動制限し、積分項がなければワインドアップも起きにくい。古典制御で別途付ける飽和・アンチワインドアップが、MF の有限幅として自然に入っている。</p>
+    </div>
+
+    <div class="answer">
+      <div class="a-h">問 5 <span class="badge">応用</span></div>
+      <ul>
+        <li><strong>アグレッシブ：</strong>ZE 帯が狭く原点の傾きが急 → 等価ゲインが大きい<strong>高ゲイン PD</strong>。速応だが行き過ぎ・振動を招きやすい。</li>
+        <li><strong>ソフト：</strong>原点付近に平坦な領域（不感帯）があり傾きが緩い → <strong>低ゲイン＋不感帯</strong>。滑らかだが応答が遅く定常偏差が残りやすい。</li>
+      </ul>
+      <p>古典制御のゲインチューニング（速応性 vs 安定余裕のトレードオフ）に対応。ファジィでは「ルール表の値」と「MF 幅」を変えることがゲイン調整に当たる。</p>
+    </div>
+
+    <div class="answer">
+      <div class="a-h">問 6 <span class="badge">応用</span></div>
+      <p>R2 を <strong>Warm → Fast</strong> に変えると、中温域で結論が Medium から Fast に替わり、伝達特性 <math><mrow><mi>u</mi><mo>(</mo><mi>T</mi><mo>)</mo></mrow></math> が中温で大きく持ち上がる。</p>
+      <table class="tbl">
+        <thead><tr><th>温度</th><th>変更前 u*</th><th>変更後 u*（Warm→Fast）</th></tr></thead>
+        <tbody>
+          <tr><td>18°C</td><td>41.0%</td><td>60.0%</td></tr>
+          <tr><td>22°C</td><td>50.0%</td><td>83.5%</td></tr>
+          <tr><td>27°C</td><td>59.7%</td><td>79.5%</td></tr>
+        </tbody>
+      </table>
+      <div class="final">中温でもファンが強く回る → 過冷却・ハンチング気味の挙動に。</div>
+      <p class="demo-val">「常識的なルール設計（中くらいには中くらい）」を崩すと制御が乱れる好例。デモの伝達特性カーブで山が中央へ寄るのを確認させる。</p>
+    </div>
+
+    <div class="answer">
+      <div class="a-h">問 7 <span class="badge">発展</span></div>
+      <p>三角形 MF が<strong>等間隔・隣接和 1</strong>（partition of unity：<math><mrow><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>μ</mi><mi>i</mi></msub><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><mn>1</mn></mrow></math>）で、後件部の中心が入力ラベルの中心の線形結合に配置され、重心（＝加重平均）デファジィ化を使う場合、ファジィ出力は入力に対する<strong>線形補間</strong>になり、その領域で厳密に</p>
+      <div class="eq"><math display="block"><mrow><msup><mi>u</mi><mo>∗</mo></msup><mo>=</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math></div>
+      <p>に一致する。本デモの MF（中心間隔 0.5・半幅 0.5 ＝ 隣接和 1）と「標準 PD」の線形なルール配置はこの条件を満たし、飽和しない原点近傍で線形 PD に一致する。</p>
+      <div class="final">数値確認：原点の等価ゲイン <math><mrow><msub><mi>K</mi><mi>p</mi></msub><mo>≈</mo><msub><mi>K</mi><mi>d</mi></msub><mo>≈</mo><mn>1.45</mn></mrow></math>（標準 PD・対称ゆえ <math><mrow><msub><mi>K</mi><mi>p</mi></msub><mo>=</mo><msub><mi>K</mi><mi>d</mi></msub></mrow></math>）</div>
+      <p class="demo-val">補足：Takagi–Sugeno 型では後件部を最初から線形式 <math><mrow><mi>u</mi><mo>=</mo><mi>a</mi><mi>e</mi><mo>+</mo><mi>b</mi><mover><mi>e</mi><mo>˙</mo></mover></mrow></math> で書くので、この「線形になる」性質がより明示的。応用ショーケース参照。</p>
+    </div>
+
+    <!-- E ルーブリック -->
+    <h2 class="sec" id="e"><span class="num">E.</span>評価ルーブリック（例）</h2>
+    <table class="tbl">
+      <thead><tr><th>観点</th><th>到達（A）</th><th>合格（B）</th><th>未達（C）</th></tr></thead>
+      <tbody>
+        <tr><td>ファジィ化・推論</td><td>μ・発火強度・合成を正確に手計算</td><td>手順は追えるが数値に誤り</td><td>min/max の使い分け不明</td></tr>
+        <tr><td>デファジィ化</td><td>重心の意味を加重平均として説明できる</td><td>公式適用はできる</td><td>なぜ 1 点になるか説明不可</td></tr>
+        <tr><td>PD との接続</td><td>制御曲面の傾き＝等価ゲイン、飽和の意味まで論じる</td><td>「非線形 PD」と述べられる</td><td>古典制御と結びつかない</td></tr>
+        <tr><td>設計的思考</td><td>ルール/MF 変更の影響を予測しデモで検証</td><td>変更の方向性は言える</td><td>試行錯誤のみ</td></tr>
+      </tbody>
+    </table>
+
+    <!-- F 発展 -->
+    <h2 class="sec" id="f"><span class="num">F.</span>発展・次の一歩</h2>
+    <ul>
+      <li><strong>応用ショーケース</strong>で実用例（家電・鉄道・産業）と最新動向（Takagi–Sugeno、Type-2、ANFIS/ニューロファジィ、説明可能 AI、再エネ MPPT）へ展開。</li>
+      <li>Python（scikit-fuzzy / numpy）でデモと同じ推論を実装し、ステップ応答を古典 PD と比較する課題。</li>
+      <li>Takagi–Sugeno 型と LMI による安定性解析（大学院向け）。</li>
+    </ul>
+
+    <div class="footer">
+      教員用ガイド & 模範解答 · <a href="index.html">教材トップへ</a><br>
+      解答値はデモの推論ロジック（Mamdani・重心法）を再現して算出
+    </div>
+  </div>
+</div>
+</body>
+</html>

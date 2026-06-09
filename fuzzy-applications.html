@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>応用ショーケース — 世の中のファジィと最新動向</title>
+<style>
+  :root {
+    --bg: #f6f4ee; --surface: #ffffff; --surface-2: #efece4;
+    --text-1: #1a1a1a; --text-2: #5f5e5a; --text-3: #888780;
+    --border: rgba(0,0,0,0.10); --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB; --info-text: #0C447C;
+    --blue: #378ADD; --blue-deep: #0C447C;
+    --amber: #EF9F27; --amber-bg: #FAEEDA; --amber-text: #854F0B;
+    --red: #E24B4A; --red-bg: #FCEBEB; --red-text: #A32D2D;
+    --green: #3C9A50; --green-bg: #E4F2E4; --green-text: #1F5B2E;
+    --border-strong: var(--border-2); --text-primary: var(--text-1); --text-secondary: var(--text-2);
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --surface: #1f1f1d; --surface-2: #2a2a27;
+      --text-1: #f0eee8; --text-2: #b4b2a9; --text-3: #888780;
+      --border: rgba(255,255,255,0.10); --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C; --info-text: #B5D4F4; --blue: #5BA0E8; --blue-deep: #B5D4F4;
+      --amber-bg: #3a2f1c; --amber-text: #E8C88A;
+      --red-bg: #3a2020; --red-text: #F0A0A0;
+      --green-bg: #1e3a24; --green-text: #A5D6A7;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 15px; line-height: 1.7; }
+  .app { max-width: 1080px; margin: 0 auto; padding: 18px 20px 60px; }
+  svg { display: block; }
+  .lec-nav { display: flex; gap: 14px; margin-bottom: 16px; padding: 2px 4px; font-size: 12px; flex-wrap: wrap; align-items: center; }
+  .lec-nav a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color 0.1s, border-color 0.1s; }
+  .lec-nav a:hover { color: var(--text-1); border-bottom-color: var(--border-2); }
+  .lec-nav a.home { color: var(--text-2); font-weight: 500; }
+  .lec-nav .sep { color: var(--text-3); opacity: 0.5; }
+
+  .title-block { border-bottom: 0.5px solid var(--border-2); padding-bottom: 18px; margin-bottom: 8px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); font-weight: 500; margin: 0 0 6px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .title-block p { color: var(--text-2); margin: 4px 0 0; font-size: 14.5px; max-width: 76ch; }
+
+  h2.sec { font-size: 19px; font-weight: 600; margin: 40px 0 12px; padding-top: 14px; border-top: 0.5px solid var(--border); }
+  h2.sec .ic { color: var(--blue); margin-right: 8px; }
+  h3 { font-size: 15.5px; font-weight: 600; margin: 18px 0 4px; }
+  p { margin: 10px 0; }
+  strong { font-weight: 600; }
+  .lead { font-size: 15px; color: var(--text-2); }
+  cite { font-style: normal; font-size: 11.5px; color: var(--text-3); }
+  math { font-size: 1.04em; }
+
+  /* timeline */
+  .timeline { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .tl { background: var(--surface); border: 0.5px solid var(--border); border-radius: 8px; padding: 9px 12px; border-top: 2.5px solid var(--blue); }
+  .tl .y { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tl .e { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+
+  /* gallery */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 10px; }
+  .gcard { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 13px 15px; border-left: 3px solid var(--text-3); }
+  .gcard.home2 { border-left-color: var(--blue); }
+  .gcard.move { border-left-color: var(--amber); }
+  .gcard.ind { border-left-color: var(--red); }
+  .gcard .cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); font-weight: 600; }
+  .gcard .gt { font-size: 14.5px; font-weight: 600; margin: 2px 0 3px; }
+  .gcard .who { font-size: 11.5px; color: var(--text-2); }
+  .gcard .io { font-size: 12.5px; color: var(--text-1); margin: 6px 0; }
+  .gcard .io b { color: var(--text-2); font-weight: 600; }
+  .gcard cite { display: block; margin-top: 6px; }
+
+  /* interactive demo panels */
+  .demo { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin: 14px 0; }
+  .demo-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  .demo-hd .dt { font-size: 15px; font-weight: 600; }
+  .demo-hd .dm { font-size: 11px; color: var(--text-3); }
+  .demo-desc { font-size: 13px; color: var(--text-2); margin: 2px 0 10px; }
+  .ctrl { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+  .ctrl label { font-size: 12px; color: var(--text-2); min-width: 96px; }
+  .ctrl .val { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
+  input[type="range"] { -webkit-appearance: none; appearance: none; height: 3px; background: var(--border-2); border-radius: 2px; flex: 1; min-width: 120px; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--text-1); border-radius: 50%; cursor: pointer; }
+  input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; background: var(--text-1); border: none; border-radius: 50%; cursor: pointer; }
+  .btn { font-size: 12px; padding: 4px 10px; background: transparent; border: 0.5px solid var(--border-2); border-radius: 6px; cursor: pointer; color: var(--text-2); font-family: inherit; }
+  .btn:hover { background: var(--surface-2); color: var(--text-1); }
+  .btn.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
+  .rule-mtx { display: grid; grid-template-columns: 64px repeat(3, 1fr); gap: 3px; margin: 8px 0; max-width: 360px; }
+  .rule-mtx .h { font-size: 10px; color: var(--text-2); text-align: center; padding: 3px; }
+  .rule-mtx .c { padding: 7px 3px; text-align: center; font-size: 11px; font-weight: 600; border-radius: 5px; border: 1.5px solid transparent; }
+  .out-big { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .out-lab { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* methods */
+  .methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .method { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 13px 16px; }
+  .method h3 { margin: 0 0 4px; }
+  .method p { margin: 4px 0; font-size: 13px; color: var(--text-2); }
+
+  /* trends */
+  .trends { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 10px; }
+  .trend { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 15px; }
+  .trend .tg { font-size: 14px; font-weight: 600; }
+  .trend .td { font-size: 12.5px; color: var(--text-2); margin-top: 3px; }
+  .trend .tag { display: inline-block; font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 20px; background: var(--green-bg); color: var(--green-text); margin-bottom: 5px; }
+
+  .note { background: var(--amber-bg); border-left: 3px solid var(--amber-text); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: var(--amber-text); line-height: 1.6; }
+  .note .nh { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  .refs { font-size: 12px; color: var(--text-2); columns: 2; column-gap: 28px; }
+  .refs li { margin-bottom: 6px; break-inside: avoid; }
+  .refs a { color: var(--blue-deep); }
+
+  .footer { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 44px; padding-top: 18px; border-top: 0.5px solid var(--border); line-height: 1.8; }
+  .footer a { color: var(--blue-deep); }
+  @media (max-width: 720px) { .methods { grid-template-columns: 1fr; } .refs { columns: 1; } body { font-size: 14.5px; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="lec-nav">
+    <a class="home" href="index.html">← 教材トップ</a>
+    <span class="sep">·</span>
+    <a href="lecture-notes.html">講義ノート</a>
+    <a href="fuzzy_temperature_controller.html">温度デモ</a>
+    <a href="fuzzy_logic_controller.html">PDデモ</a>
+  </nav>
+
+  <div class="title-block">
+    <p class="eyebrow">応用ショーケース · 実用例と最新動向</p>
+    <h1>世の中のファジィ — 家電から最新AIまで</h1>
+    <p class="lead">
+      ファジィ制御は教科書の中だけの理論ではありません。1970 年代の産業プラント、1990 年代の日本の家電ブーム、
+      そして現在の説明可能 AI・再生可能エネルギーまで、半世紀にわたり実用され続けています。
+      歴史・実用例・<strong>触って試せるミニデモ</strong>・最新研究動向を一望します。
+    </p>
+  </div>
+
+  <!-- ===== タイムライン ===== -->
+  <h2 class="sec"><span class="ic">1.</span>半世紀の歩み</h2>
+  <div class="timeline">
+    <div class="tl"><div class="y">1965</div><div class="e">Zadeh「ファジィ集合」提唱</div></div>
+    <div class="tl"><div class="y">1974</div><div class="e">Mamdani が蒸気機関をファジィ制御（実験）</div></div>
+    <div class="tl"><div class="y">1978</div><div class="e">F.L.Smidth セメント窯で工業実稼働</div></div>
+    <div class="tl"><div class="y">1985</div><div class="e">高木・菅野（TS）モデル発表</div></div>
+    <div class="tl"><div class="y">1987</div><div class="e">仙台市地下鉄 ATO にファジィ制御</div></div>
+    <div class="tl"><div class="y">1990</div><div class="e">日本でファジィ家電ブーム（流行語金賞）</div></div>
+    <div class="tl"><div class="y">1993</div><div class="e">Jang「ANFIS」（ニューロファジィ）</div></div>
+    <div class="tl"><div class="y">2002</div><div class="e">Mendel ら Type-2 ファジィを整備</div></div>
+    <div class="tl"><div class="y">2020s</div><div class="e">深層ニューロファジィ・XAI・再エネ応用</div></div>
+  </div>
+
+  <!-- ===== 実用例ギャラリー ===== -->
+  <h2 class="sec"><span class="ic">2.</span>実用例ギャラリー</h2>
+  <p class="demo-desc">各カードは「何を入力に、何を出力するか」をファジィルールで結んだ実例。年代・主体・出典つき。</p>
+  <div class="gallery">
+    <div class="gcard ind">
+      <div class="cat">産業プロセス</div>
+      <div class="gt">セメント回転窯</div>
+      <div class="who">F.L. Smidth（デンマーク）· 1978 実稼働</div>
+      <div class="io"><b>入力:</b> 窯内温度・排ガス成分・駆動電流 <b>→ 出力:</b> 燃料供給量・回転速度・ダンパ開度</div>
+      <cite>Holmblad &amp; Østergaard (1982). 最初期の工業実装の一つ。</cite>
+    </div>
+    <div class="gcard move">
+      <div class="cat">鉄道</div>
+      <div class="gt">仙台市地下鉄 ATO</div>
+      <div class="who">日立製作所 · 1987 開業時から</div>
+      <div class="io"><b>入力:</b> 速度・停止位置の偏差など <b>→ 出力:</b> 力行／制動ノッチ（予測ファジィ制御）</div>
+      <cite>安信 (1988) 日本機械学会誌. 滑らかな加減速・省エネ（約10%）と報告。</cite>
+    </div>
+    <div class="gcard home2">
+      <div class="cat">家電</div>
+      <div class="gt">全自動洗濯機「愛妻号デーファジィ」</div>
+      <div class="who">松下電器 · 1990 発売</div>
+      <div class="io"><b>入力:</b> 布量・水の濁度（汚れ）・布質 <b>→ 出力:</b> 洗濯時間・水量・洗剤量</div>
+      <cite>近藤ほか (1990) 日本ファジィ学会誌. 家電ブームの火付け役の一つ。</cite>
+    </div>
+    <div class="gcard home2">
+      <div class="cat">家電</div>
+      <div class="gt">エアコン（インバータ制御）</div>
+      <div class="who">日立・三菱電機ほか · 1991–92</div>
+      <div class="io"><b>入力:</b> 室温の偏差・変化率 <b>→ 出力:</b> コンプレッサ周波数</div>
+      <cite>特許 US5,148,977 (Hitachi) ほか。PD 型ファジィ制御の典型。</cite>
+    </div>
+    <div class="gcard move">
+      <div class="cat">自動車</div>
+      <div class="gt">自動変速機（AT）</div>
+      <div class="who">日産・三菱・GM ほか · 1989–94</div>
+      <div class="io"><b>入力:</b> 車速・エンジン負荷・勾配推定 <b>→ 出力:</b> シフト判断</div>
+      <cite>特許 US4,841,815 (Nissan); SAE (1993). 燃費 12–17% 改善の報告。</cite>
+    </div>
+    <div class="gcard home2">
+      <div class="cat">家電</div>
+      <div class="gt">掃除機（吸引力自動調整）</div>
+      <div class="who">松下電器 · 1991</div>
+      <div class="io"><b>入力:</b> ダスト量・変化率・ダスト種類 <b>→ 出力:</b> 吸引力・ブラシ回転</div>
+      <cite>特許 EP0451787A1 (Matsushita).</cite>
+    </div>
+    <div class="gcard ind">
+      <div class="cat">ビル設備</div>
+      <div class="gt">エレベータ群管理</div>
+      <div class="who">三菱電機 AI-2100 · 1988</div>
+      <div class="io"><b>入力:</b> 呼び出し情報・交通量 <b>→ 出力:</b> かご割り当て（配車）</div>
+      <cite>三菱電機 AI 群管理. 待ち時間短縮。</cite>
+    </div>
+    <div class="gcard move">
+      <div class="cat">交通（研究→実装）</div>
+      <div class="gt">信号制御（渋滞応答型）</div>
+      <div class="who">学術研究〜現在も継続</div>
+      <div class="io"><b>入力:</b> 待ち台数・最長待ち時間 <b>→ 出力:</b> 青信号延長</div>
+      <cite>近年も改良研究（例: OSFI 法, 2025）。重渋滞時スループット +18.75% の報告。</cite>
+    </div>
+  </div>
+
+  <!-- ===== 触って試す ===== -->
+  <h2 class="sec"><span class="ic">3.</span>触って試す — ミニデモ 3 種</h2>
+  <p class="demo-desc">講義ノートで学んだ Mamdani 推論に加え、Takagi–Sugeno 型・Type-2 という発展も体験できます。すべて外部依存なしで動作。</p>
+
+  <!-- demo 1: 洗濯機 -->
+  <div class="demo">
+    <div class="demo-hd"><div class="dt">① ファジィ洗濯機</div><div class="dm">Mamdani · 2 入力 · 重心法</div></div>
+    <div class="demo-desc">「汚れ」と「布量」から「洗濯時間」を決める。1990 年の実機と同じ発想：<em>汚れが多く布が多ければ長く洗う</em>。</div>
+    <div class="ctrl"><label>汚れ（濁度）</label><input type="range" id="w-dirt" min="0" max="100" step="1" value="70"><span class="val" id="w-dirt-v">70</span></div>
+    <div class="ctrl"><label>布量</label><input type="range" id="w-load" min="0" max="100" step="1" value="40"><span class="val" id="w-load-v">40</span></div>
+    <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+      <div>
+        <div class="out-lab" style="margin-bottom:4px">発火したルール（濃いほど強く発火）</div>
+        <div class="rule-mtx" id="w-mtx"></div>
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <svg id="w-out" viewBox="0 0 360 90" style="width:100%; max-width:380px;" role="img"></svg>
+        <div style="margin-top:6px"><span class="out-lab">推奨 洗濯時間</span><br><span class="out-big" id="w-time">–</span> <span style="font-size:14px">分</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- demo 2: TS -->
+  <div class="demo">
+    <div class="demo-hd"><div class="dt">② Takagi–Sugeno 局所線形ブレンド</div><div class="dm">TS 型 · 後件部が線形式</div></div>
+    <div class="demo-desc">2 本の<strong>線形モデル</strong>をメンバーシップ関数で混ぜると、滑らかな<strong>非線形カーブ</strong>になる。これが TS 型の核で、ゲインスケジューリングの厳密な一般化でもある。</div>
+    <div class="ctrl"><label>入力 x</label><input type="range" id="ts-x" min="0" max="10" step="0.1" value="5"><span class="val" id="ts-x-v">5.0</span></div>
+    <svg id="ts-svg" viewBox="0 0 680 280" style="width:100%;" role="img"></svg>
+    <div style="margin-top:4px"><span class="out-lab">ブレンド出力 y</span> = <span class="out-big" id="ts-y" style="font-size:18px">–</span></div>
+  </div>
+
+  <!-- demo 3: type1/2 -->
+  <div class="demo">
+    <div class="demo-hd"><div class="dt">③ Type-1 と Type-2 のメンバーシップ関数</div><div class="dm">Mendel · 不確実性の帯（FOU）</div></div>
+    <div class="demo-desc">Type-1 では MF は 1 本の線。<strong>Type-2</strong> では「MF の形そのものが不確か」とし、<strong>帯（FOU）</strong>で表す。スライダーで帯幅を 0 にすると Type-1 に戻る＝ Type-2 は Type-1 の一般化。</div>
+    <div class="ctrl"><label>不確実性 FOU 幅</label><input type="range" id="t2-fou" min="0" max="8" step="0.2" value="3"><span class="val" id="t2-fou-v">3.0</span></div>
+    <svg id="t2-svg" viewBox="0 0 680 200" style="width:100%;" role="img"></svg>
+    <div class="demo-desc" style="margin-top:6px">温度ラベル「寒い／快適／暑い」。帯が広いほど「人によって・状況によって境界が違う」曖昧さを表現。Type-2 はノイズや個人差に強いとされる。</div>
+  </div>
+
+  <!-- ===== 手法の系譜 ===== -->
+  <h2 class="sec"><span class="ic">4.</span>手法の系譜</h2>
+  <div class="methods">
+    <div class="method"><h3>Mamdani 型（1974–75）</h3><p>後件部もファジィ集合。min–max 合成 → 重心デファジィ化。直感的で、本教材の温度／PD デモはこの型。<cite>Mamdani &amp; Assilian (1975).</cite></p></div>
+    <div class="method"><h3>Takagi–Sugeno 型（1985）</h3><p>後件部が線形式 <math><mrow><mi>y</mi><mo>=</mo><mi>a</mi><mi>x</mi><mo>+</mo><mi>b</mi></mrow></math>。局所線形モデルのブレンド。LMI で安定性を系統的に解析でき（Tanaka–Wang 2001）、制御設計の主流。<cite>Takagi &amp; Sugeno (1985).</cite></p></div>
+    <div class="method"><h3>Type-2 ファジィ（2002–）</h3><p>MF 自体が不確実（FOU）。言語的曖昧さ・測定誤差を表現でき、外乱に頑健。近年は Type-3 も登場。<cite>Mendel &amp; John (2002).</cite></p></div>
+    <div class="method"><h3>ANFIS／ニューロファジィ（1993）</h3><p>ニューラルネット構造でファジィ推論を表し、データから MF とルールを<strong>学習</strong>。知識がなくても入出力データで設計。<cite>Jang (1993).</cite></p></div>
+  </div>
+
+  <!-- ===== 最新動向 ===== -->
+  <h2 class="sec"><span class="ic">5.</span>最新動向（2022–2025）</h2>
+  <div class="trends">
+    <div class="trend"><span class="tag">深層学習×ファジィ</span><div class="tg">Deep Neuro-Fuzzy</div><div class="td">深層 TSK 分類器など、解釈性を保ちつつ深層化。画像・音声・医療へ。<cite>Talpur ほか (2022) 総説.</cite></div></div>
+    <div class="trend"><span class="tag">説明可能 AI</span><div class="tg">XAI とファジィルール</div><div class="td">「人が読める IF–THEN ルール」としてブラックボックス DNN の解釈に活用。医療診断で活発。<cite>Information Sciences (2024) レビュー.</cite></div></div>
+    <div class="trend"><span class="tag">再生可能エネルギー</span><div class="tg">太陽光 MPPT・マイクログリッド</div><div class="td">部分影下の最大電力追従、EMS、EV のバッテリ管理に。1990 年代の家電と同じ手法が再エネで再活躍。<cite>Scientific Reports (2024).</cite></div></div>
+    <div class="trend"><span class="tag">エッジ AI / IoT</span><div class="tg">低計算量の組み込み推論</div><div class="td">DNN より軽量。ANFIS をマイコン（ESP32）に実装しエネルギー最適化。<cite>MDPI Processes (2026).</cite></div></div>
+    <div class="trend"><span class="tag">理論の最前線</span><div class="tg">Type-3 ファジィ・連合学習</div><div class="td">さらに高次の不確実性表現、フェデレーテッド・ファジィ NN、量子ファジィ推論など萌芽研究。<cite>Mendel (2024) IEEE/CAA.</cite></div></div>
+    <div class="trend"><span class="tag">交通・ロボティクス</span><div class="tg">適応型信号・自律移動</div><div class="td">実出力と目標の類似度でルールを更新する適応制御、障害物回避の階層ファジィ。<cite>ScienceDirect (2025).</cite></div></div>
+  </div>
+
+  <!-- ===== 正確性メモ ===== -->
+  <div class="note">
+    <div class="nh">⚖ 正確性についての注記（教材として）</div>
+    「世界初」「○○が初めて」という主張は範囲限定が必要です。たとえば仙台市地下鉄はファジィ ATO の早い実用例ですが、産業プロセスではセメント窯（1978）がより早く稼働しています。家電も複数社が同時期に開発しており先後関係は確定しづらく、一部製品の「ファジィ」は宣伝的側面もありました。本ページの年代・出典は二次情報を含むため、研究引用には一次文献（下記）の確認を推奨します。
+  </div>
+
+  <!-- ===== 出典 ===== -->
+  <h2 class="sec"><span class="ic">6.</span>主要出典</h2>
+  <ul class="refs">
+    <li>L.A. Zadeh, “Fuzzy Sets,” <em>Information and Control</em>, 8(3), 1965.</li>
+    <li>E.H. Mamdani &amp; S. Assilian, “An Experiment in Linguistic Synthesis with a Fuzzy Logic Controller,” <em>Int. J. Man-Machine Studies</em>, 7(1), 1975.</li>
+    <li>L.P. Holmblad &amp; J.-J. Østergaard, “Control of a Cement Kiln by Fuzzy Logic,” North Holland, 1982.</li>
+    <li>T. Takagi &amp; M. Sugeno, “Fuzzy Identification of Systems…,” <em>IEEE Trans. SMC</em>, 15(1), 1985.</li>
+    <li>安信誠二, 「ファジィ理論の実システムへの応用：仙台市地下鉄列車自動運転」, <em>日本機械学会誌</em>, 91(836), 1988.</li>
+    <li>近藤信二ほか, 「愛妻号デーファジィの紹介」, <em>日本ファジィ学会誌</em>, 2(3), 1990.</li>
+    <li>J.-S.R. Jang, “ANFIS,” <em>IEEE Trans. SMC</em>, 23(3), 1993.</li>
+    <li>J.M. Mendel &amp; R.I. John, “Type-2 Fuzzy Sets Made Simple,” <em>IEEE Trans. Fuzzy Systems</em>, 10(2), 2002.</li>
+    <li>K. Tanaka &amp; H.O. Wang, <em>Fuzzy Control Systems Design and Analysis: An LMI Approach</em>, Wiley, 2001.</li>
+    <li>N. Talpur et al., “Deep Neuro-Fuzzy System… a systematic survey,” <em>Artificial Intelligence Review</em>, 2022.</li>
+    <li>“Fuzzy inference system with interpretable fuzzy rules… disease diagnosis,” <em>Information Sciences</em>, 662, 2024.</li>
+    <li>“Hybrid fuzzy logic MPPT… partial shading,” <em>Scientific Reports</em>, 14, 2024.</li>
+  </ul>
+
+  <div class="footer">
+    応用ショーケース · <a href="index.html">教材トップへ</a> · <a href="lecture-notes.html">講義ノートで理論を学ぶ</a><br>
+    実用例・年代・出典は調査に基づく（二次情報を含む）。ミニデモは Mamdani／TS／Type-2 を簡略実装したもの
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // ===================== Demo 1: ファジィ洗濯機 =====================
+  function tri(x,a,b,c){ if(x<=a||x>=c) return 0; return x<=b ? (x-a)/(b-a) : (c-x)/(c-b); }
+  function trapL(x,b,c){ if(x<=b) return 1; return x<c ? (c-x)/(c-b) : 0; }
+  function trapR(x,a,b){ if(x>=b) return 1; return x>a ? (x-a)/(b-a) : 0; }
+  var D = [ x=>trapL(x,20,50), x=>tri(x,30,55,80), x=>trapR(x,55,85) ];   // Low Med High
+  var L = [ x=>trapL(x,20,50), x=>tri(x,30,55,80), x=>trapR(x,55,85) ];   // Small Med Large
+  var T = [ u=>trapL(u,8,22), u=>tri(u,15,30,45), u=>trapR(u,38,52) ];    // Short Med Long
+  var TN = ['短い','普通','長い'];
+  var TC = ['#378ADD','#EF9F27','#E24B4A'];
+  var R = [[0,0,1],[0,1,2],[1,2,2]];   // [dirt][load] -> time idx
+  var DN = ['少ない','普通','多い'], LN = ['少ない','普通','多い'];
+
+  function washInfer(dirt, load){
+    var md = D.map(f=>f(dirt)), ml = L.map(f=>f(load));
+    var fires = [];
+    for(var i=0;i<3;i++) for(var j=0;j<3;j++){
+      var w = Math.min(md[i], ml[j]);
+      fires.push({i,j,w,out:R[i][j]});
+    }
+    var agg = u => { var m=0; fires.forEach(f=>{ if(f.w>0){ var c=Math.min(T[f.out](u), f.w); if(c>m) m=c; } }); return m; };
+    var num=0, den=0;
+    for(var u=0; u<=60.0001; u+=0.5){ var a=agg(u); num+=u*a; den+=a; }
+    return { crisp: den>0?num/den:0, fires, agg };
+  }
+  function washUpdate(){
+    var dirt = +document.getElementById('w-dirt').value;
+    var load = +document.getElementById('w-load').value;
+    document.getElementById('w-dirt-v').textContent = dirt;
+    document.getElementById('w-load-v').textContent = load;
+    var r = washInfer(dirt, load);
+    // rule matrix
+    var mtx = document.getElementById('w-mtx');
+    var h = '<div class="h"></div><div class="h">布 少</div><div class="h">布 中</div><div class="h">布 多</div>';
+    for(var i=0;i<3;i++){
+      h += '<div class="h" style="display:flex;align-items:center;justify-content:flex-end;padding-right:6px">汚 '+['少','中','多'][i]+'</div>';
+      for(var j=0;j<3;j++){
+        var f = r.fires.find(x=>x.i===i&&x.j===j);
+        var o = R[i][j];
+        var op = f ? (0.25 + 0.75*f.w) : 0.25;
+        var br = (f&&f.w>0.01) ? 'border-color:var(--text-1);' : '';
+        h += '<div class="c" style="background:'+TC[o]+'22;color:'+TC[o]+';opacity:'+op.toFixed(2)+';'+br+'">'+TN[o]+'</div>';
+      }
+    }
+    mtx.innerHTML = h;
+    // output bar (aggregated set + centroid)
+    var W=360,H=90,p={l:30,r:12,t:10,b:24}, pw=W-p.l-p.r, ph=H-p.t-p.b;
+    var xs = u => p.l + (u/60)*pw, ys = m => p.t + (1-m)*ph;
+    var s = '';
+    s += '<line x1="'+p.l+'" y1="'+(p.t+ph)+'" x2="'+(W-p.r)+'" y2="'+(p.t+ph)+'" stroke="var(--border-2)" stroke-width="0.5"/>';
+    [0,20,40,60].forEach(v=>{ s+='<text x="'+xs(v)+'" y="'+(p.t+ph+14)+'" text-anchor="middle" font-size="9" fill="var(--text-2)">'+v+'</text>'; });
+    T.forEach((f,i)=>{ var pts=[]; for(var u=0;u<=60;u+=1) pts.push(xs(u)+','+ys(f(u))); s+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+TC[i]+'" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>'; });
+    var env=[]; for(var u=0;u<=60;u+=0.5) env.push(xs(u)+','+ys(r.agg(u)));
+    s += '<polyline points="'+env.join(' ')+'" fill="none" stroke="var(--text-1)" stroke-width="1.5"/>';
+    var cx = xs(r.crisp);
+    s += '<line x1="'+cx+'" y1="'+p.t+'" x2="'+cx+'" y2="'+(p.t+ph)+'" stroke="var(--text-1)" stroke-width="1.5"/>';
+    document.getElementById('w-out').innerHTML = s;
+    document.getElementById('w-time').textContent = r.crisp.toFixed(0);
+  }
+  document.getElementById('w-dirt').addEventListener('input', washUpdate);
+  document.getElementById('w-load').addEventListener('input', washUpdate);
+
+  // ===================== Demo 2: Takagi-Sugeno =====================
+  var msmall = x => Math.max(0, Math.min(1, (5-x)/5));
+  var mbig   = x => 1 - msmall(x);
+  var y1 = x => 2*x + 1;
+  var y2 = x => -1*x + 20;
+  var tsOut = x => { var w1=msmall(x), w2=mbig(x); return (w1*y1(x)+w2*y2(x))/(w1+w2); };
+  function tsUpdate(){
+    var x = +document.getElementById('ts-x').value;
+    document.getElementById('ts-x-v').textContent = x.toFixed(1);
+    var W=680,H=280,p={l:42,r:14,t:14,b:64}, pw=W-p.l-p.r, ph=H-p.t-p.b;
+    var XS = v => p.l + (v/10)*pw, YS = v => p.t + (1 - v/22)*ph;
+    var s='';
+    // grid
+    [0,5,10,15,20].forEach(v=>{ s+='<line x1="'+p.l+'" y1="'+YS(v)+'" x2="'+(p.l+pw)+'" y2="'+YS(v)+'" stroke="var(--border)" stroke-width="0.5"/>'; s+='<text x="'+(p.l-6)+'" y="'+(YS(v)+3)+'" text-anchor="end" font-size="9" fill="var(--text-2)">'+v+'</text>'; });
+    [0,2,4,6,8,10].forEach(v=>{ s+='<text x="'+XS(v)+'" y="'+(p.t+ph+14)+'" text-anchor="middle" font-size="9" fill="var(--text-2)">'+v+'</text>'; });
+    // local linear models (dashed)
+    s += '<polyline points="'+XS(0)+','+YS(y1(0))+' '+XS(10)+','+YS(y1(10))+'" fill="none" stroke="#378ADD" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>';
+    s += '<text x="'+XS(9.4)+'" y="'+(YS(y1(9.4))-4)+'" font-size="9" fill="#378ADD">y₁=2x+1</text>';
+    s += '<polyline points="'+XS(0)+','+YS(y2(0))+' '+XS(10)+','+YS(y2(10))+'" fill="none" stroke="#E24B4A" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>';
+    s += '<text x="'+XS(0.3)+'" y="'+(YS(y2(0.3))-4)+'" font-size="9" fill="#E24B4A">y₂=−x+20</text>';
+    // blended curve
+    var pts=[]; for(var v=0;v<=10;v+=0.1) pts.push(XS(v)+','+YS(tsOut(v)));
+    s += '<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--text-1)" stroke-width="2"/>';
+    // current point
+    var cy = tsOut(x);
+    s += '<line x1="'+XS(x)+'" y1="'+p.t+'" x2="'+XS(x)+'" y2="'+(p.t+ph)+'" stroke="var(--text-1)" stroke-width="0.5" stroke-dasharray="3,3"/>';
+    s += '<circle cx="'+XS(x)+'" cy="'+YS(cy)+'" r="5" fill="var(--text-1)"/>';
+    s += '<text x="'+(XS(x))+'" y="'+(YS(cy)-9)+'" text-anchor="middle" font-size="10" font-weight="600" fill="var(--text-1)">y='+cy.toFixed(1)+'</text>';
+    // MF strip at bottom
+    var my0 = p.t+ph+24, mh = 26;
+    var mys = m => my0 + (1-m)*mh;
+    s += '<text x="'+(p.l-6)+'" y="'+(my0+mh)+'" text-anchor="end" font-size="8" fill="var(--text-3)">MF</text>';
+    var ps=[],pb=[]; for(var v=0;v<=10;v+=0.1){ ps.push(XS(v)+','+mys(msmall(v))); pb.push(XS(v)+','+mys(mbig(v))); }
+    s += '<polyline points="'+ps.join(' ')+'" fill="none" stroke="#378ADD" stroke-width="1.25"/>';
+    s += '<polyline points="'+pb.join(' ')+'" fill="none" stroke="#E24B4A" stroke-width="1.25"/>';
+    s += '<text x="'+XS(0.3)+'" y="'+(my0-2)+'" font-size="8" fill="#378ADD">小</text>';
+    s += '<text x="'+XS(9.4)+'" y="'+(my0-2)+'" font-size="8" fill="#E24B4A">大</text>';
+    s += '<line x1="'+XS(x)+'" y1="'+my0+'" x2="'+XS(x)+'" y2="'+(my0+mh)+'" stroke="var(--text-1)" stroke-width="0.5" stroke-dasharray="2,2"/>';
+    document.getElementById('ts-svg').innerHTML = s;
+    document.getElementById('ts-y').textContent = cy.toFixed(2);
+  }
+  document.getElementById('ts-x').addEventListener('input', tsUpdate);
+
+  // ===================== Demo 3: Type-1 vs Type-2 =====================
+  var labels = [ {c:8, name:'寒い', col:'#378ADD'}, {c:20, name:'快適', col:'#EF9F27'}, {c:32, name:'暑い', col:'#E24B4A'} ];
+  var HALF = 10;
+  function t1(x, c, d){ return Math.max(0, 1 - Math.abs(x-c)/d); }
+  function t2Update(){
+    var fou = +document.getElementById('t2-fou').value;
+    document.getElementById('t2-fou-v').textContent = fou.toFixed(1);
+    var W=680,H=200,p={l:36,r:14,t:30,b:28}, pw=W-p.l-p.r, ph=H-p.t-p.b;
+    var XS = v => p.l + (v/40)*pw, YS = m => p.t + (1-m)*ph;
+    var s='';
+    s += '<line x1="'+p.l+'" y1="'+(p.t+ph)+'" x2="'+(W-p.r)+'" y2="'+(p.t+ph)+'" stroke="var(--border-2)" stroke-width="0.5"/>';
+    [0,10,20,30,40].forEach(v=>{ s+='<text x="'+XS(v)+'" y="'+(p.t+ph+14)+'" text-anchor="middle" font-size="9" fill="var(--text-2)">'+v+'°C</text>'; });
+    [0,1].forEach(m=>{ s+='<text x="'+(p.l-5)+'" y="'+(YS(m)+3)+'" text-anchor="end" font-size="9" fill="var(--text-2)">'+m+'</text>'; });
+    labels.forEach(L=>{
+      // FOU band: between inner (d-fou) and outer (d+fou)
+      var dOut = HALF + fou, dIn = Math.max(0.5, HALF - fou);
+      if(fou > 0){
+        var top=[], bot=[];
+        for(var v=0; v<=40; v+=0.5){ top.push(XS(v)+','+YS(t1(v,L.c,dOut))); }
+        for(var v=40; v>=0; v-=0.5){ bot.push(XS(v)+','+YS(t1(v,L.c,dIn))); }
+        s += '<polygon points="'+top.concat(bot).join(' ')+'" fill="'+L.col+'" fill-opacity="0.22" stroke="none"/>';
+      }
+      // Type-1 line (nominal)
+      var pts=[]; for(var v=0; v<=40; v+=0.5) pts.push(XS(v)+','+YS(t1(v,L.c,HALF)));
+      s += '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+L.col+'" stroke-width="1.5"/>';
+      s += '<text x="'+XS(L.c)+'" y="'+(p.t-8)+'" text-anchor="middle" font-size="10" font-weight="600" fill="'+L.col+'">'+L.name+'</text>';
+    });
+    var modeTxt = fou<=0.001 ? 'いま Type-1（帯幅 0）' : 'いま Type-2（帯 = 不確実性 FOU）';
+    s += '<text x="'+(W-p.r)+'" y="'+(p.t-8)+'" text-anchor="end" font-size="10" fill="var(--text-3)">'+modeTxt+'</text>';
+    document.getElementById('t2-svg').innerHTML = s;
+  }
+  document.getElementById('t2-fou').addEventListener('input', t2Update);
+
+  // init
+  washUpdate(); tsUpdate(); t2Update();
+})();
+</script>
+</body>
+</html>

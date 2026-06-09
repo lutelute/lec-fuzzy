@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>講義ノート — ファジィ制御の基礎</title>
+<style>
+  :root {
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-2: #efece4;
+    --text-1: #1a1a1a;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --border: rgba(0,0,0,0.10);
+    --border-2: rgba(0,0,0,0.22);
+    --info-bg: #E6F1FB;
+    --info-text: #0C447C;
+    --blue: #378ADD;
+    --blue-deep: #0C447C;
+    --amber-bg: #FAEEDA;
+    --amber-text: #854F0B;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614;
+      --surface: #1f1f1d;
+      --surface-2: #2a2a27;
+      --text-1: #f0eee8;
+      --text-2: #b4b2a9;
+      --text-3: #888780;
+      --border: rgba(255,255,255,0.10);
+      --border-2: rgba(255,255,255,0.22);
+      --info-bg: #0C447C;
+      --info-text: #B5D4F4;
+      --blue: #5BA0E8;
+      --blue-deep: #B5D4F4;
+      --amber-bg: #3a2f1c;
+      --amber-text: #E8C88A;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); font-family: var(--font-sans); font-size: 15px; line-height: 1.75; }
+  .app { max-width: 1080px; margin: 0 auto; padding: 18px 20px 60px; }
+
+  /* nav */
+  .lec-nav { display: flex; gap: 14px; margin-bottom: 16px; padding: 2px 4px; font-size: 12px; flex-wrap: wrap; align-items: center; }
+  .lec-nav a { color: var(--text-3); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color 0.1s, border-color 0.1s; }
+  .lec-nav a:hover { color: var(--text-1); border-bottom-color: var(--border-2); }
+  .lec-nav a.home { color: var(--text-2); font-weight: 500; }
+  .lec-nav .sep { color: var(--text-3); opacity: 0.5; }
+
+  .doc { max-width: 800px; margin: 0 auto; }
+
+  .title-block { border-bottom: 0.5px solid var(--border-2); padding-bottom: 18px; margin-bottom: 8px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); font-weight: 500; margin: 0 0 6px; }
+  h1 { font-size: 27px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .title-block p { color: var(--text-2); margin: 4px 0 0; font-size: 14.5px; }
+
+  /* toc */
+  .toc { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin: 22px 0 30px; }
+  .toc h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-2); margin: 0 0 8px; font-weight: 600; }
+  .toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; font-size: 13.5px; }
+  .toc li { margin-bottom: 4px; break-inside: avoid; }
+  .toc a { color: var(--text-1); text-decoration: none; }
+  .toc a:hover { color: var(--blue-deep); }
+
+  h2.sec { font-size: 19px; font-weight: 600; margin: 40px 0 6px; padding-top: 14px; border-top: 0.5px solid var(--border); letter-spacing: -0.005em; }
+  h2.sec .num { color: var(--blue); font-variant-numeric: tabular-nums; margin-right: 8px; }
+  h3 { font-size: 15px; font-weight: 600; margin: 22px 0 4px; }
+  p { margin: 10px 0; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+  math { font-size: 1.05em; }
+  math[display="block"] { font-size: 1.12em; }
+
+  /* equation block */
+  .eq { margin: 16px 0 16px 6px; padding-left: 14px; border-left: 2px solid var(--border); overflow-x: auto; }
+  .eq .tag { float: right; color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+
+  /* definition box */
+  .def { background: var(--surface); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 13px 17px; margin: 18px 0; }
+  .def-h { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); font-weight: 600; margin-bottom: 4px; }
+
+  /* textbook sidenote */
+  .note { background: var(--info-bg); border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 18px 0; font-size: 13.5px; color: var(--info-text); line-height: 1.65; }
+  .note .note-h { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.9; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .note math { color: inherit; }
+
+  /* demo CTA */
+  .demo-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); color: var(--blue-deep); padding: 9px 15px; border-radius: 8px; text-decoration: none; font-size: 13.5px; font-weight: 500; margin: 10px 0; border: 0.5px solid var(--border-2); transition: border-color 0.12s, transform 0.08s; }
+  .demo-cta:hover { border-color: var(--blue); transform: translateY(-1px); }
+  .demo-cta .arrow { color: var(--blue); }
+
+  /* worked example */
+  .example { background: var(--surface-2); border-radius: var(--radius); padding: 14px 18px; margin: 18px 0; }
+  .example .ex-h { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber-text); font-weight: 600; margin-bottom: 6px; }
+
+  /* tables */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+  .tbl th, .tbl td { border: 0.5px solid var(--border); padding: 6px 10px; text-align: center; }
+  .tbl thead th { background: var(--surface-2); font-weight: 600; }
+  .tbl td.lab, .tbl th.lab { background: var(--surface-2); font-weight: 600; }
+  .tbl.left th, .tbl.left td { text-align: left; }
+
+  /* exercises */
+  .ex-list { margin: 8px 0; }
+  .ex { border-left: 3px solid var(--border-2); padding: 4px 0 4px 16px; margin: 16px 0; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 20px; margin-right: 8px; vertical-align: middle; }
+  .badge.basic { background: var(--info-bg); color: var(--info-text); }
+  .badge.applied { background: var(--amber-bg); color: var(--amber-text); }
+  .badge.adv { background: #F1E0F5; color: #6A2C7A; }
+  @media (prefers-color-scheme: dark) { .badge.adv { background: #3a233f; color: #DDB3E8; } }
+  .ex-q { margin: 4px 0; }
+
+  details.hint { margin: 8px 0; font-size: 13.5px; }
+  details.hint summary { cursor: pointer; color: var(--blue-deep); font-weight: 500; }
+  details.hint p { margin: 8px 0 0; color: var(--text-2); }
+
+  .footer { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 44px; padding-top: 18px; border-top: 0.5px solid var(--border); line-height: 1.8; }
+
+  @media (max-width: 720px) {
+    .toc ol { columns: 1; }
+    body { font-size: 14.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="lec-nav">
+    <a class="home" href="index.html">← 教材トップ</a>
+    <span class="sep">·</span>
+    <a href="fuzzy_temperature_controller.html">温度制御デモ</a>
+    <a href="fuzzy_logic_controller.html">PD型制御デモ</a>
+  </nav>
+
+  <div class="doc">
+
+    <div class="title-block">
+      <p class="eyebrow">制御工学 補助教材 · 講義ノート</p>
+      <h1>ファジィ制御の基礎</h1>
+      <p>ファジィ化 → ルール推論（Mamdani）→ デファジィ化 と、古典制御（PID）との接続</p>
+    </div>
+
+    <p>
+      このノートは、制御理論の教科書で <strong>PID 制御</strong> までを学んだ読者を対象に、ファジィ制御の考え方を
+      最小限の数式とインタラクティブなデモで整理するものです。各節には併読すべき教科書の章を示す
+      <strong>「📖 教科書と読む」</strong>サイドノートと、デモへのリンクを置きました。手を動かしながら読み進めてください。
+    </p>
+
+    <div class="toc">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#s1">なぜファジィ制御か</a></li>
+        <li><a href="#s2">ファジィ集合とメンバーシップ関数</a></li>
+        <li><a href="#s3">ファジィ化</a></li>
+        <li><a href="#s4">ファジィルールとルールベース</a></li>
+        <li><a href="#s5">Mamdani 推論（含意と合成）</a></li>
+        <li><a href="#s6">デファジィ化と制御曲面 — PD制御との接続</a></li>
+        <li><a href="#s7">演習問題</a></li>
+        <li><a href="#s8">記号表・用語対訳</a></li>
+      </ol>
+    </div>
+
+    <!-- ============ §1 ============ -->
+    <h2 class="sec" id="s1"><span class="num">1</span>なぜファジィ制御か</h2>
+    <p>
+      古典制御では、まずプラントの数式モデル <math><mrow><mi>G</mi><mo>(</mo><mi>s</mi><mo>)</mo></mrow></math>
+      を立て、それに対して PID ゲインや補償器を設計します。これは強力ですが、
+      <strong>正確なモデルを立てにくい対象</strong>（人の感覚に依存する空調・洗濯機・カメラの露出、複雑で非線形なプロセス）では行き詰まります。
+    </p>
+    <p>
+      ファジィ制御は発想を逆転させます。「<em>もし温度がかなり高ければ、ファンをかなり速く回す</em>」といった、
+      熟練者が言葉で持っている制御知識を、そのまま <strong>IF–THEN ルール</strong> の集まりとして実装します。
+      モデル <math><mrow><mi>G</mi><mo>(</mo><mi>s</mi><mo>)</mo></mrow></math> を必要とせず、
+      「かなり高い」「少し速く」といった曖昧な言葉を <strong>メンバーシップ関数</strong> で数量化するのが特徴です。
+    </p>
+    <p>本ノートでは、最も基本的な <strong>Mamdani 型</strong>ファジィ制御を、次の 3 段階に分けて扱います。</p>
+    <ol>
+      <li><strong>ファジィ化</strong>（§3）— 観測値（温度や偏差）を「Cold が 0.2、Warm が 0.43…」のように各ファジィ集合への帰属度に変換する。</li>
+      <li><strong>ルール推論</strong>（§4–5）— IF–THEN ルールを発火させ、出力側のファジィ集合を合成する。</li>
+      <li><strong>デファジィ化</strong>（§6）— 合成されたファジィ集合から、実際に出力する 1 つの数値（ファン速度など）を取り出す。</li>
+    </ol>
+
+    <div class="note">
+      <div class="note-h">📖 教科書と読む</div>
+      PID 制御・オンオフ制御の章と並べて読むと位置づけが鮮明になります。古典制御が「<strong>モデルから制御則へ</strong>」なのに対し、
+      ファジィ制御は「<strong>制御知識からそのまま制御則へ</strong>」。両者は競合ではなく、適用対象で役割分担します。
+      なお §6 で見るとおり、PD 型ファジィ制御は古典の PD 制御則
+      <math><mrow><mi>u</mi><mo>=</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math>
+      の <em>非線形な拡張</em> とみなせます。
+    </div>
+
+    <!-- ============ §2 ============ -->
+    <h2 class="sec" id="s2"><span class="num">2</span>ファジィ集合とメンバーシップ関数</h2>
+    <p>
+      通常の（クリスプな）集合では、ある要素は集合に「属する／属さない」の二択です。
+      ファジィ集合では、要素 <math><mi>x</mi></math> が集合 <math><mi>A</mi></math> にどれだけ属するかを、
+      <strong>メンバーシップ値</strong> <math><mrow><msub><mi>μ</mi><mi>A</mi></msub><mo>(</mo><mi>x</mi><mo>)</mo><mo>∈</mo><mo>[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>]</mo></mrow></math>
+      という連続値で表します。
+    </p>
+
+    <div class="def">
+      <div class="def-h">定義：三角形メンバーシップ関数</div>
+      中心 <math><mi>c</mi></math>、半幅 <math><mi>d</mi></math> の三角形 MF は
+      <div class="eq">
+        <math display="block">
+          <mrow>
+            <msub><mi>μ</mi><mi>A</mi></msub><mo>(</mo><mi>x</mi><mo>)</mo>
+            <mo>=</mo>
+            <mi>max</mi><mrow><mo>(</mo><mn>0</mn><mo>,</mo>
+            <mrow><mn>1</mn><mo>−</mo><mfrac><mrow><mo>|</mo><mi>x</mi><mo>−</mo><mi>c</mi><mo>|</mo></mrow><mi>d</mi></mfrac></mrow>
+            <mo>)</mo></mrow>
+          </mrow>
+        </math>
+      </div>
+      <math><mrow><mi>x</mi><mo>=</mo><mi>c</mi></mrow></math> で <math><mn>1</mn></math>、
+      <math><mrow><mo>|</mo><mi>x</mi><mo>−</mo><mi>c</mi><mo>|</mo><mo>≥</mo><mi>d</mi></mrow></math> で <math><mn>0</mn></math> になります。
+    </div>
+
+    <p>
+      台形 MF は頂上が平らな版で、ある区間まるごとを「完全に Cold」と扱いたいとき（例：10°C 以下はどれも完全に Cold）に使います。
+      下の温度デモでは、入力側に台形（Cold, Hot）と三角形（Warm）を、出力側にすべて三角形を用いています。
+    </p>
+
+    <div class="note">
+      <div class="note-h">📖 注意：確率とは違う</div>
+      メンバーシップ値は確率ではありません。1 つの温度に対する <math><msub><mi>μ</mi><mtext>Cold</mtext></msub></math>、
+      <math><msub><mi>μ</mi><mtext>Warm</mtext></msub></math>、<math><msub><mi>μ</mi><mtext>Hot</mtext></msub></math> の総和は
+      <strong>1 とは限りません</strong>。「18°C は Cold でも 0.2、Warm でも 0.43」のように、複数の集合に同時に部分的に属してよいのがファジィの本質です。
+    </div>
+
+    <!-- ============ §3 ============ -->
+    <h2 class="sec" id="s3"><span class="num">3</span>ファジィ化</h2>
+    <p>
+      <strong>ファジィ化（fuzzification）</strong>とは、観測された 1 つの数値（クリスプ値）を、各ファジィ集合へのメンバーシップ値に変換する操作です。
+      入力が温度 <math><mi>T</mi></math> なら、<math><mrow><msub><mi>μ</mi><mtext>Cold</mtext></msub><mo>(</mo><mi>T</mi><mo>)</mo></mrow></math> など各集合の値を読み取るだけです。
+    </p>
+
+    <div class="example">
+      <div class="ex-h">例：温度デモの定義で T = 18°C をファジィ化</div>
+      <p style="margin-top:4px">温度デモの入力 MF は <code>Cold = trap(0,0,10,20)</code>, <code>Warm = tri(15,22,30)</code>, <code>Hot = trap(25,35,40,40)</code> です。<math><mrow><mi>T</mi><mo>=</mo><mn>18</mn></mrow></math> を代入すると</p>
+      <div class="eq">
+        <math display="block">
+          <mtable columnalign="left">
+            <mtr><mtd><msub><mi>μ</mi><mtext>Cold</mtext></msub><mo>(</mo><mn>18</mn><mo>)</mo></mtd><mtd><mo>=</mo></mtd><mtd><mfrac><mrow><mn>20</mn><mo>−</mo><mn>18</mn></mrow><mn>10</mn></mfrac><mo>=</mo><mn>0.20</mn></mtd></mtr>
+            <mtr><mtd><msub><mi>μ</mi><mtext>Warm</mtext></msub><mo>(</mo><mn>18</mn><mo>)</mo></mtd><mtd><mo>=</mo></mtd><mtd><mfrac><mrow><mn>18</mn><mo>−</mo><mn>15</mn></mrow><mn>7</mn></mfrac><mo>≈</mo><mn>0.43</mn></mtd></mtr>
+            <mtr><mtd><msub><mi>μ</mi><mtext>Hot</mtext></msub><mo>(</mo><mn>18</mn><mo>)</mo></mtd><mtd><mo>=</mo></mtd><mtd><mn>0</mn></mtd></mtr>
+          </mtable>
+        </math>
+      </div>
+      <p style="margin-bottom:4px">つまり 18°C は「やや Cold で、それ以上に Warm」と数量化されます。デモのスライダーを 18°C に合わせ、入力 MF パネルの丸印が同じ値を指すことを確かめてください。</p>
+    </div>
+
+    <a class="demo-cta" href="fuzzy_temperature_controller.html">温度デモでファジィ化を見る <span class="arrow">→</span></a>
+
+    <!-- ============ §4 ============ -->
+    <h2 class="sec" id="s4"><span class="num">4</span>ファジィルールとルールベース</h2>
+    <p>
+      制御知識は <strong>IF–THEN ルール</strong>の集まり（ルールベース）として書きます。温度デモのルールベースは次の 3 本です。
+    </p>
+    <ul>
+      <li>R1: <strong>IF</strong> 温度が Cold <strong>THEN</strong> ファンは Slow</li>
+      <li>R2: <strong>IF</strong> 温度が Warm <strong>THEN</strong> ファンは Medium</li>
+      <li>R3: <strong>IF</strong> 温度が Hot <strong>THEN</strong> ファンは Fast</li>
+    </ul>
+    <p>
+      入力が 2 つになると、前件部を <strong>AND</strong> で結びます。PD 型制御デモでは入力は偏差
+      <math><mi>e</mi></math> と偏差微分 <math><mover><mi>e</mi><mo>˙</mo></mover></math> の 2 つで、ルールは
+      「<strong>IF</strong> <math><mi>e</mi></math> が PS <strong>かつ</strong> <math><mover><mi>e</mi><mo>˙</mo></mover></math> が NS <strong>THEN</strong> <math><mi>u</mi></math> は ZE」
+      のように書けます。各入力を 5 つの言語値 <code>NB, NS, ZE, PS, PB</code>（負大・負小・ゼロ・正小・正大）に分けるので、ルールは
+      <math><mrow><mn>5</mn><mo>×</mo><mn>5</mn><mo>=</mo><mn>25</mn></mrow></math> 本になり、これを <strong>ルール表</strong>（下表）にまとめます。
+    </p>
+
+    <table class="tbl">
+      <thead>
+        <tr><th class="lab">e ＼ ė</th><th>NB</th><th>NS</th><th>ZE</th><th>PS</th><th>PB</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lab">NB</td><td>NB</td><td>NB</td><td>NB</td><td>NS</td><td>ZE</td></tr>
+        <tr><td class="lab">NS</td><td>NB</td><td>NB</td><td>NS</td><td>ZE</td><td>PS</td></tr>
+        <tr><td class="lab">ZE</td><td>NB</td><td>NS</td><td>ZE</td><td>PS</td><td>PB</td></tr>
+        <tr><td class="lab">PS</td><td>NS</td><td>ZE</td><td>PS</td><td>PB</td><td>PB</td></tr>
+        <tr><td class="lab">PB</td><td>ZE</td><td>PS</td><td>PB</td><td>PB</td><td>PB</td></tr>
+      </tbody>
+    </table>
+    <p>
+      この「標準 PD」表には規則性があります。左上（<math><mi>e</mi></math> も <math><mover><mi>e</mi><mo>˙</mo></mover></math> も負大）では出力 NB、
+      右下では PB、<strong>対角線上で ZE</strong>。これは「偏差と偏差の変化を足し合わせて出力を決める」という PD 的な発想そのものです（§6 で定量化します）。
+    </p>
+
+    <div class="note">
+      <div class="note-h">📖 教科書と読む</div>
+      ルール表の対角構造は、PD 制御則 <math><mrow><mi>u</mi><mo>∝</mo><mi>e</mi><mo>+</mo><mi>λ</mi><mover><mi>e</mi><mo>˙</mo></mover></mrow></math>
+      の等高線（<math><mrow><mi>e</mi><mo>+</mo><mi>λ</mi><mover><mi>e</mi><mo>˙</mo></mover><mo>=</mo><mtext>一定</mtext></mrow></math>）に対応します。
+      教科書の位相平面・スライディングモードの図と見比べると、ルール表が状態平面の分割になっていることが分かります。
+    </div>
+
+    <a class="demo-cta" href="fuzzy_logic_controller.html">PDデモでルール表を編集する（セルをクリック）<span class="arrow">→</span></a>
+
+    <!-- ============ §5 ============ -->
+    <h2 class="sec" id="s5"><span class="num">5</span>Mamdani 推論（含意と合成）</h2>
+    <p>Mamdani 推論は、各ルールについて次を行い、最後にすべてを重ね合わせます。</p>
+
+    <h3>(a) 発火強度</h3>
+    <p>ルールの前件部がどれだけ成り立つかを <strong>発火強度</strong> <math><msub><mi>w</mi><mi>k</mi></msub></math> で測ります。AND は <strong>min</strong> でとります。</p>
+    <div class="eq">
+      <math display="block">
+        <mrow><msub><mi>w</mi><mi>k</mi></msub><mo>=</mo><mi>min</mi><mo>(</mo><msub><mi>μ</mi><mrow><mi>e</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>(</mo><mi>e</mi><mo>)</mo><mo>,</mo><msub><mi>μ</mi><mrow><mover><mi>e</mi><mo>˙</mo></mover><mo>,</mo><mi>j</mi></mrow></msub><mo>(</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>)</mo><mo>)</mo></mrow>
+      </math>
+    </div>
+
+    <h3>(b) 含意（implication）</h3>
+    <p>
+      発火強度 <math><msub><mi>w</mi><mi>k</mi></msub></math> で、そのルールの結論部 MF を上から押しつぶします（min 含意 ＝ <strong>α カット</strong>）。
+      結論が「Fast」で <math><mrow><msub><mi>w</mi><mi>k</mi></msub><mo>=</mo><mn>0.4</mn></mrow></math> なら、Fast の MF を高さ 0.4 で頭打ちにした台形が得られます。
+    </p>
+
+    <h3>(c) 合成（aggregation）</h3>
+    <p>すべてのルールの押しつぶした結論を <strong>max</strong> で重ね合わせ、1 つの合成ファジィ集合 <math><mrow><msub><mi>μ</mi><mtext>agg</mtext></msub><mo>(</mo><mi>u</mi><mo>)</mo></mrow></math> を作ります。</p>
+    <div class="eq">
+      <math display="block">
+        <mrow>
+          <msub><mi>μ</mi><mtext>agg</mtext></msub><mo>(</mo><mi>u</mi><mo>)</mo>
+          <mo>=</mo>
+          <munder><mi>max</mi><mi>k</mi></munder>
+          <mi>min</mi><mo>(</mo><msub><mi>w</mi><mi>k</mi></msub><mo>,</mo><msub><mi>μ</mi><mrow><mtext>out</mtext><mo>,</mo><mi>k</mi></mrow></msub><mo>(</mo><mi>u</mi><mo>)</mo><mo>)</mo>
+        </mrow>
+      </math>
+    </div>
+    <p>
+      これが「max–of–min」合成です。デモの出力パネルでは、各ルールの α カット（網掛け）と、それらを重ねた合成集合（太線）が描かれます。
+      温度デモで 18°C のとき、Slow が高さ 0.20、Medium が高さ 0.43 で押しつぶされ、両者の上包絡線が合成集合になる様子を確認してください。
+    </p>
+
+    <div class="note">
+      <div class="note-h">📖 教科書と読む</div>
+      min（AND）・max（OR）は、ブール論理の論理積・論理和をファジィに連続化したものです。
+      <math><mrow><mi>min</mi><mo>(</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>)</mo><mo>=</mo><mn>1</mn></mrow></math>、
+      <math><mrow><mi>min</mi><mo>(</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>)</mo><mo>=</mo><mn>0</mn></mrow></math>
+      のように、両端では普通の論理に一致します。論理回路や状態機械を学んだ章と対比すると理解が早いです。
+    </div>
+
+    <!-- ============ §6 ============ -->
+    <h2 class="sec" id="s6"><span class="num">6</span>デファジィ化と制御曲面 — PD制御との接続</h2>
+    <p>
+      合成集合 <math><mrow><msub><mi>μ</mi><mtext>agg</mtext></msub><mo>(</mo><mi>u</mi><mo>)</mo></mrow></math> はまだ「形」であって、アクチュエータに送る 1 つの数値ではありません。
+      <strong>デファジィ化</strong>で 1 点に縮約します。最も標準的なのが <strong>重心法（centroid）</strong>です。
+    </p>
+
+    <div class="def">
+      <div class="def-h">定義：重心デファジィ化</div>
+      <div class="eq">
+        <math display="block">
+          <mrow>
+            <msup><mi>u</mi><mo>∗</mo></msup>
+            <mo>=</mo>
+            <mfrac>
+              <mrow><mo>∫</mo><mi>u</mi><mo>·</mo><msub><mi>μ</mi><mtext>agg</mtext></msub><mo>(</mo><mi>u</mi><mo>)</mo><mspace width="2px"/><mi>d</mi><mi>u</mi></mrow>
+              <mrow><mo>∫</mo><msub><mi>μ</mi><mtext>agg</mtext></msub><mo>(</mo><mi>u</mi><mo>)</mo><mspace width="2px"/><mi>d</mi><mi>u</mi></mrow>
+            </mfrac>
+          </mrow>
+        </math>
+      </div>
+      合成集合の「面積の重心の <math><mi>u</mi></math> 座標」です。実装では区間を細かく刻んだ数値積分（温度デモは <math><mrow><mi>Δ</mi><mi>u</mi><mo>=</mo><mn>0.5</mn></mrow></math>、PDデモは <math><mn>0.02</mn></math>）で計算します。
+    </div>
+
+    <p>
+      入力をすべての組み合わせで動かし、デファジィ化した出力 <math><msup><mi>u</mi><mo>∗</mo></msup></math> をプロットしたものが <strong>制御曲面</strong>です。
+      1 入力なら曲線（温度デモの伝達特性 <math><mrow><mi>u</mi><mo>(</mo><mi>T</mi><mo>)</mo></mrow></math>）、2 入力なら曲面 <math><mrow><mi>u</mi><mo>(</mo><mi>e</mi><mo>,</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>)</mo></mrow></math> になります。
+    </p>
+
+    <h3>制御曲面が PD 制御則になる</h3>
+    <p>
+      PD デモで「標準 PD」プリセットの制御曲面を見ると、<strong>原点付近はほぼ平らな斜面</strong>で、端では値が ±1 に <strong>飽和</strong>しています。
+      原点近傍を平面で近似すると
+    </p>
+    <div class="eq">
+      <math display="block">
+        <mrow>
+          <msup><mi>u</mi><mo>∗</mo></msup><mo>(</mo><mi>e</mi><mo>,</mo><mover><mi>e</mi><mo>˙</mo></mover><mo>)</mo>
+          <mo>≈</mo>
+          <msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover>
+          <mo>,</mo><mspace width="10px"/>
+          <msub><mi>K</mi><mi>p</mi></msub><mo>=</mo><msub><mfrac><mrow><mo>∂</mo><msup><mi>u</mi><mo>∗</mo></msup></mrow><mrow><mo>∂</mo><mi>e</mi></mrow></mfrac><mn>0</mn></msub>
+          <mo>,</mo><mspace width="6px"/>
+          <msub><mi>K</mi><mi>d</mi></msub><mo>=</mo><msub><mfrac><mrow><mo>∂</mo><msup><mi>u</mi><mo>∗</mo></msup></mrow><mrow><mo>∂</mo><mover><mi>e</mi><mo>˙</mo></mover></mrow></mfrac><mn>0</mn></msub>
+        </mrow>
+      </math>
+    </div>
+    <p>
+      となり、<strong>原点まわりの傾きがそのまま等価 PD ゲイン</strong>を与えます。つまり標準 PD 型ファジィ制御器は、
+      小さな偏差に対しては教科書どおりの線形 PD 制御として振る舞い、大きな偏差では飽和してアクチュエータを守る — という
+      <strong>「飽和付き非線形 PD 制御」</strong>になっているのです。これがファジィ制御と古典制御をつなぐ最重要ポイントです。
+    </p>
+
+    <div class="note">
+      <div class="note-h">📖 教科書と読む</div>
+      「アグレッシブ」プリセットは原点の傾き（＝ゲイン）が急で、ZE 帯が狭い → 高ゲイン PD。
+      「ソフト」プリセットは傾きが緩く、原点付近に平坦な不感帯ができる → 低ゲイン＋不感帯。
+      教科書の <strong>ゲイン調整と応答（速応性 vs 行き過ぎ）</strong> の議論を、制御曲面の傾きと飽和という幾何で読み直せます。
+      ルール表や MF 幅を変えることが、古典制御でいうゲインチューニングに当たります。
+    </div>
+
+    <a class="demo-cta" href="fuzzy_logic_controller.html">PDデモで制御曲面の傾きと飽和を確かめる <span class="arrow">→</span></a>
+
+    <!-- ============ §7 ============ -->
+    <h2 class="sec" id="s7"><span class="num">7</span>演習問題</h2>
+    <p>手計算 → デモで答え合わせ、の順で取り組んでください。記号は §8 を参照。</p>
+
+    <div class="ex-list">
+      <div class="ex">
+        <p class="ex-q"><span class="badge basic">基礎</span><strong>問 1.</strong> 温度デモの入力 MF 定義（<code>Cold=trap(0,0,10,20)</code>, <code>Warm=tri(15,22,30)</code>, <code>Hot=trap(25,35,40,40)</code>）を用いて、<math><mrow><mi>T</mi><mo>=</mo><mn>27</mn></mrow></math>°C のときの <math><msub><mi>μ</mi><mtext>Cold</mtext></msub></math>, <math><msub><mi>μ</mi><mtext>Warm</mtext></msub></math>, <math><msub><mi>μ</mi><mtext>Hot</mtext></msub></math> を求めよ。</p>
+        <details class="hint"><summary>ヒント</summary><p>27°C は Warm の右下がり区間 <math><mrow><mo>(</mo><mn>30</mn><mo>−</mo><mi>T</mi><mo>)</mo><mo>/</mo><mn>8</mn></mrow></math> と Hot の立ち上がり <math><mrow><mo>(</mo><mi>T</mi><mo>−</mo><mn>25</mn><mo>)</mo><mo>/</mo><mn>10</mn></mrow></math> の重なり。Cold は 20°C 以上なので 0。答え：Cold=0, Warm≈0.375, Hot=0.2。</p></details>
+      </div>
+
+      <div class="ex">
+        <p class="ex-q"><span class="badge basic">基礎</span><strong>問 2.</strong> 問 1 の結果と標準ルール（Cold→Slow, Warm→Medium, Hot→Fast）を使って、各ルールの発火強度 <math><msub><mi>w</mi><mi>k</mi></msub></math> を求め、合成集合（どの出力 MF がどの高さで α カットされるか）を言葉で説明せよ。最後にファン速度を温度デモで読み取り、重心がどのあたりに来るか考察せよ。</p>
+      </div>
+
+      <div class="ex">
+        <p class="ex-q"><span class="badge basic">基礎</span><strong>問 3.</strong> PD デモの入力 MF は中心 <math><mrow><mo>[</mo><mo>−</mo><mn>1</mn><mo>,</mo><mo>−</mo><mn>0.5</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0.5</mn><mo>,</mo><mn>1</mn><mo>]</mo></mrow></math>、半幅 <math><mrow><mi>d</mi><mo>=</mo><mn>0.5</mn></mrow></math> の三角形である。<math><mrow><mi>e</mi><mo>=</mo><mn>0.4</mn></mrow></math> のとき値が正になる言語値とその <math><mi>μ</mi></math> を求めよ（<math><mover><mi>e</mi><mo>˙</mo></mover></math> も同様に <math><mrow><mo>−</mo><mn>0.3</mn></mrow></math> で）。発火するルールは何本か。</p>
+        <details class="hint"><summary>ヒント</summary><p><math><mrow><mi>μ</mi><mo>(</mo><mn>0.4</mn><mo>)</mo></mrow></math>: ZE は <math><mrow><mn>1</mn><mo>−</mo><mn>0.4</mn><mo>/</mo><mn>0.5</mn><mo>=</mo><mn>0.2</mn></mrow></math>、PS は <math><mrow><mn>1</mn><mo>−</mo><mn>0.1</mn><mo>/</mo><mn>0.5</mn><mo>=</mo><mn>0.8</mn></mrow></math>。<math><mi>e</mi></math> 側 2 つ × <math><mover><mi>e</mi><mo>˙</mo></mover></math> 側 2 つ＝最大 4 本発火。</p></details>
+      </div>
+
+      <div class="ex">
+        <p class="ex-q"><span class="badge applied">応用</span><strong>問 4.</strong> 「標準 PD」プリセットの制御曲面が、原点付近でほぼ平面に見えるのに端で ±1 に飽和するのはなぜか。ルール表の対角構造とメンバーシップ関数の有限幅の観点から説明せよ。また、この飽和が実機制御で果たす役割を、アクチュエータの観点から述べよ。</p>
+      </div>
+
+      <div class="ex">
+        <p class="ex-q"><span class="badge applied">応用</span><strong>問 5.</strong> 「アグレッシブ」と「ソフト」プリセットの制御曲面を、原点の傾き（等価 PD ゲイン）と不感帯の広さで比較せよ。それぞれが古典制御のどんなチューニング（高ゲイン／低ゲイン／不感帯付き）に対応するか論じよ。</p>
+      </div>
+
+      <div class="ex">
+        <p class="ex-q"><span class="badge applied">応用</span><strong>問 6.</strong> 温度デモでルール R2 を「Warm → Fast」に変更すると、伝達特性 <math><mrow><mi>u</mi><mo>(</mo><mi>T</mi><mo>)</mo></mrow></math> は中温域でどう変化すると予想されるか。理由とともに述べ、デモで確認せよ。</p>
+      </div>
+
+      <div class="ex">
+        <p class="ex-q"><span class="badge adv">発展</span><strong>問 7.</strong> PD 型ファジィ制御器の出力が、ある領域で線形 PD 制御則 <math><mrow><mi>u</mi><mo>=</mo><msub><mi>K</mi><mi>p</mi></msub><mi>e</mi><mo>+</mo><msub><mi>K</mi><mi>d</mi></msub><mover><mi>e</mi><mo>˙</mo></mover></mrow></math> に<strong>厳密に一致</strong>するには、メンバーシップ関数・ルール・デファジィ化にどんな条件が必要か。三角形 MF が等間隔で隣接和が 1（partition of unity）になる場合を手がかりに議論せよ。</p>
+      </div>
+    </div>
+
+    <!-- ============ §8 ============ -->
+    <h2 class="sec" id="s8"><span class="num">8</span>記号表・用語対訳</h2>
+    <table class="tbl left">
+      <thead><tr><th style="width:22%">記号</th><th style="width:38%">意味</th><th>補足</th></tr></thead>
+      <tbody>
+        <tr><td><math><mi>e</mi></math>, <math><mover><mi>e</mi><mo>˙</mo></mover></math></td><td>偏差 <math><mrow><mi>e</mi><mo>=</mo><mi>r</mi><mo>−</mo><mi>y</mi></mrow></math> と偏差微分</td><td>PD デモの 2 入力</td></tr>
+        <tr><td><math><mi>u</mi></math>, <math><msup><mi>u</mi><mo>∗</mo></msup></math></td><td>操作量／デファジィ化後の確定出力</td><td>ファン速度・制御入力</td></tr>
+        <tr><td><math><mrow><msub><mi>μ</mi><mi>A</mi></msub><mo>(</mo><mi>x</mi><mo>)</mo></mrow></math></td><td>集合 <math><mi>A</mi></math> へのメンバーシップ値</td><td><math><mrow><mo>∈</mo><mo>[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>]</mo></mrow></math></td></tr>
+        <tr><td><math><mi>c</mi></math>, <math><mi>d</mi></math></td><td>三角形 MF の中心・半幅</td><td>PD デモは <math><mrow><mi>d</mi><mo>=</mo><mn>0.5</mn></mrow></math></td></tr>
+        <tr><td><math><msub><mi>w</mi><mi>k</mi></msub></math></td><td>ルール <math><mi>k</mi></math> の発火強度</td><td>前件部 min</td></tr>
+        <tr><td><math><mrow><msub><mi>μ</mi><mtext>agg</mtext></msub></mrow></math></td><td>合成（aggregated）ファジィ集合</td><td>max–of–min</td></tr>
+        <tr><td><math><msub><mi>K</mi><mi>p</mi></msub></math>, <math><msub><mi>K</mi><mi>d</mi></msub></math></td><td>比例・微分ゲイン</td><td>原点の曲面の傾き</td></tr>
+        <tr><td>NB/NS/ZE/PS/PB</td><td>負大・負小・ゼロ・正小・正大</td><td>言語値（5 段階）</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:18px"><strong>用語対訳：</strong>
+      ファジィ化 = fuzzification ／ デファジィ化 = defuzzification ／ メンバーシップ関数 = membership function ／
+      発火強度 = firing strength ／ 含意 = implication ／ 合成 = aggregation ／ 重心法 = centroid method ／ 制御曲面 = control surface。
+    </p>
+
+    <div class="footer">
+      講義ノート「ファジィ制御の基礎」 · <a href="index.html" style="color:var(--blue-deep)">教材トップへ戻る</a><br>
+      Mamdani 推論（三角形/台形 MF · max–min 合成 · 重心デファジィ化）· 教育用
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
